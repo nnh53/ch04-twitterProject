@@ -8,54 +8,62 @@ import { config } from 'dotenv'
 config()
 
 class UsersService {
-    // hàm nhận vào user_id để bỏ vào payload tạo access token
-    signAccessToken(user_id: string) {
-        return signToken({
-            payload: {
-                user_id,
-                token_type: TokenType.AccessToken,
-                options: {
-                    expiresIn: process.env.ACCESS_TOKEN_EXPIRE_IN
-                }
-            }
-        })
-    }
+  // hàm nhận vào user_id để bỏ vào payload tạo access token
+  signAccessToken(user_id: string) {
+    return signToken({
+      payload: {
+        user_id,
+        token_type: TokenType.AccessToken,
+        options: {
+          expiresIn: process.env.ACCESS_TOKEN_EXPIRE_IN
+        }
+      }
+    })
+  }
 
-    // hàm nhận vào user_id để bỏ vào payload tạo refresh token
-    signRefreshToken(user_id: string) {
-        return signToken({
-            payload: {
-                user_id,
-                token_type: TokenType.RefeshToken,
-                options: {
-                    expiresIn: process.env.REFRESH_TOKEN_EXPIRE_IN
-                }
-            }
-        })
-    }
+  // hàm nhận vào user_id để bỏ vào payload tạo refresh token
+  signRefreshToken(user_id: string) {
+    return signToken({
+      payload: {
+        user_id,
+        token_type: TokenType.RefreshToken,
+        options: {
+          expiresIn: process.env.REFRESH_TOKEN_EXPIRE_IN
+        }
+      }
+    })
+  }
 
-    async checkEmailExist(email: string) {
-        const user = await databaseService.users.findOne({ email })
-        return Boolean(user)
-    }
+  // ký access_token và refresh_token
+  private signAccessAndRefreshToken(user_id: string) {
+    return Promise.all([this.signAccessToken(user_id), this.signRefreshToken(user_id)])
+  }
 
-    async register(payLoad: RegisterReqBody) {
-        const result = await databaseService.users.insertOne(
-            new User({
-                ...payLoad,
-                date_of_birth: new Date(payLoad.date_of_birth),
-                password: hashPassword(payLoad.password)
-            })
-        )
+  async checkEmailExist(email: string) {
+    const user = await databaseService.users.findOne({ email })
+    return Boolean(user)
+  }
 
-        // lấy user_id từ user mới tạo
-        const user_id = result.insertedId.toString()
-        const [access_token, refresh_token] = await Promise.all([
-            this.signAccessToken(user_id),
-            this.signRefreshToken(user_id)
-        ])
-        return [access_token, refresh_token]
-    }
+  async register(payLoad: RegisterReqBody) {
+    const result = await databaseService.users.insertOne(
+      new User({
+        ...payLoad,
+        date_of_birth: new Date(payLoad.date_of_birth),
+        password: hashPassword(payLoad.password)
+      })
+    )
+
+    // lấy user_id từ user mới tạo
+    const user_id = result.insertedId.toString()
+    const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id)
+    return { access_token: access_token, refresh_token: refresh_token }
+  }
+
+  async login(user_id: string) {
+    // dùng user_id tạo ra access_token và refresh_token
+    const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id)
+    return [access_token, refresh_token]
+  }
 }
 
 const userService = new UsersService()

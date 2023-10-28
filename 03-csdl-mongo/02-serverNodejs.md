@@ -29,9 +29,9 @@ touch main.js
     ```js
     //http là 1 module có sẵn dùng để tạo server bằng nodejs
     //http là module core của expressjs sau này(cũng dùng để tạo server)
-    const http = require("http");
+    const http = require('http')
 
-    console.log(http);
+    console.log(http)
     ```
 
   - chạy file xem thử
@@ -43,19 +43,19 @@ touch main.js
 - bây giờ, trong file `main.js` ta sẽ dùng http để tạo server
 
   ```js
-  const http = require("http");
+  const http = require('http')
 
-  const PORT = 4000;
+  const PORT = 4000
 
   //này giúp mình tạo server trước
   const server = http.createServer((req, res) => {
-    res.end("hello");
-  });
+    res.end('hello')
+  })
 
   //server sẽ chạy trên port 4000
   server.listen(PORT, () => {
-    console.log("Server đang chạy trên port" + PORT);
-  });
+    console.log('Server đang chạy trên port' + PORT)
+  })
   ```
 
 - chạy `node main.js` và truy cập `localhost:4000` ta sẽ nhận được 'hello'
@@ -64,9 +64,9 @@ nếu muốn trả về json thì ta thay chỗ `res.end` thành
 
 ```js
 const server = http.createServer((req, res) => {
-  res.setHeader("Content-type", "application/json");
-  res.end(`{"msg": "ahihi json nè"}`);
-});
+  res.setHeader('Content-type', 'application/json')
+  res.end(`{"msg": "ahihi json nè"}`)
+})
 ```
 
 xong chạy lại `server` thì ta sẽ dùng postman test thử và thấy nó đã thành json rồi
@@ -107,21 +107,21 @@ có nhiều cách
 - file `index.js` nội dung này lấy từ trang chủ [link](https://expressjs.com/en/starter/hello-world.html)
 
   ```js
-  const express = require("express");
-  const app = express(); //giống createServer
-  const port = 4000;
+  const express = require('express')
+  const app = express() //giống createServer
+  const port = 4000
 
-  app.get("/", (req, res) => {
-    res.send("Hello World!");
-  });
+  app.get('/', (req, res) => {
+    res.send('Hello World!')
+  })
 
-  app.get("/hi", (req, res) => {
-    res.send("hi World!");
-  });
+  app.get('/hi', (req, res) => {
+    res.send('hi World!')
+  })
 
   app.listen(port, () => {
-    console.log(`server express đang mở trên port ${port}`);
-  });
+    console.log(`server express đang mở trên port ${port}`)
+  })
   ```
 
 - chạy thử `node index.js`
@@ -380,8 +380,8 @@ touch .editorconfig
 nội dung .editorconfig
 
 ```js
-indent_size = 2;
-indent_style = space;
+indent_size = 2
+indent_style = space
 ```
 
 ### thêm .gitignore
@@ -452,8 +452,8 @@ trong src ta thêm file index.ts
 thử nội dung sau
 
 ```ts
-const name: string = "Anh điệp đẹp trai";
-console.log(name);
+const name: string = 'Anh điệp đẹp trai'
+console.log(name)
 ```
 
 bạn sẽ thấy nó nói rằng "ai cũng hiểu đây là string k cần phải có keyword string này" và bạn thấy đây là eslint báo cho bạn
@@ -461,15 +461,15 @@ bạn sẽ thấy nó nói rằng "ai cũng hiểu đây là string k cần ph�
 nên ta xóa đi
 
 ```ts
-const name = "Anh điệp đẹp trai";
-console.log(name);
+const name = 'Anh điệp đẹp trai'
+console.log(name)
 ```
 
 vscode sẽ báo là k nên đặt tên biến là name
 
 ```ts
-const fullname = "Anh điệp đẹp trai";
-console.log(fullname);
+const fullname = 'Anh điệp đẹp trai'
+console.log(fullname)
 ```
 
 # cài đặt xong rồi, giờ ta chạy thử dự án của mình
@@ -485,12 +485,12 @@ ta sẽ vào index.ts code thêm tý xíu ts xem nodemon có hoạt động bìn
 index.ts thêm từng dòng sau
 
 ```ts
-type Handle = () => Promise<string>; //định nghĩa rằng handle là 1 promise trả ra string
-const handleF: Handle = () => Promise.resolve(fullname + " ahihi");
+type Handle = () => Promise<string> //định nghĩa rằng handle là 1 promise trả ra string
+const handleF: Handle = () => Promise.resolve(fullname + ' ahihi')
 //xài thử thử hàm handleF
 handleF().then((res) => {
-  console.log(res);
-});
+  console.log(res)
+})
 
 //có thể thay khúc xài hàm bằng thế này
 //handleF().then(console.log);
@@ -503,7 +503,7 @@ kiểm tra terminal để xem kết quả nhe
 index.ts thêm nội dung
 
 ```ts
-const person: any = {};
+const person: any = {}
 ```
 
 nó k báo gì cả, ta vào .eslintrc
@@ -526,7 +526,7 @@ nhưng mà cái này là một lỗi logic nên k fix đc, nên mình sẽ fix b
 bằng cách nói rỏ là tính lưu object trông như nào
 
 ```ts
-const person: { name: string; age: number } = { name: "Điệp", age: 15 };
+const person: { name: string; age: number } = { name: 'Điệp', age: 15 }
 ```
 
 ### test prettier

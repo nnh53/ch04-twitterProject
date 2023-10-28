@@ -44,24 +44,24 @@ thêm vào tsconfig.json nội dung sau
 
 ```json
 {
-    "compilerOptions": {
-        "module": "CommonJS", // Quy định output module được sử dụng
-        "moduleResolution": "node", //
-        "target": "ES2020", // Target ouput cho code
-        "outDir": "dist", // Đường dẫn output cho thư mục build
-        "esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */,
-        "strict": true /* Enable all strict type-checking options. */,
-        "skipLibCheck": true /* Skip type checking all .d.ts files. */,
-        "baseUrl": ".", // Đường dẫn base cho các import
-        "paths": {
-            "~/*": ["src/*"] // Đường dẫn tương đối cho các import (alias)
-        }
-    },
-    "ts-node": {
-        "require": ["tsconfig-paths/register"]
-    },
-    "files": ["src/type.d.ts"], // Các file dùng để defined global type cho dự án
-    "include": ["src/**/*"] // Đường dẫn include cho các file cần build
+  "compilerOptions": {
+    "module": "CommonJS", // Quy định output module được sử dụng
+    "moduleResolution": "node", //
+    "target": "ES2020", // Target ouput cho code
+    "outDir": "dist", // Đường dẫn output cho thư mục build
+    "esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */,
+    "strict": true /* Enable all strict type-checking options. */,
+    "skipLibCheck": true /* Skip type checking all .d.ts files. */,
+    "baseUrl": ".", // Đường dẫn base cho các import
+    "paths": {
+      "~/*": ["src/*"] // Đường dẫn tương đối cho các import (alias)
+    }
+  },
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  },
+  "files": ["src/type.d.ts"], // Các file dùng để defined global type cho dự án
+  "include": ["src/**/*"] // Đường dẫn include cho các file cần build
 }
 ```
 
@@ -202,10 +202,10 @@ nội dung
 
 ```json
 {
-    "watch": ["src"],
-    "ext": ".ts,.js", //trecking các file có ts và js
-    "ignore": [], //liệt kê file nào mà bạn k thích theo dõi vào
-    "exec": "npx ts-node ./src/index.ts" //chạy file index
+  "watch": ["src"],
+  "ext": ".ts,.js", //trecking các file có ts và js
+  "ignore": [], //liệt kê file nào mà bạn k thích theo dõi vào
+  "exec": "npx ts-node ./src/index.ts" //chạy file index
 }
 ```
 
@@ -264,11 +264,11 @@ import express from 'express'
 const app = express()
 const port = 3000
 app.get('/', (req, res) => {
-    res.send('hello world')
+  res.send('hello world')
 })
 
 app.listen(port, () => {
-    console.log(`Project twitter này đang chạy trên post ${port}`)
+  console.log(`Project twitter này đang chạy trên post ${port}`)
 })
 ```
 
@@ -290,8 +290,8 @@ nếu ta cần chia nhỏ các bộ routing như dự án của mình ta phải 
 ![Alt text](./attachments/./attachments/image-1.png)
 _hình trên doc của express_
 
--   khi mà /about chạy hay / chạy thì middleware chạy trước đến khi `next()`
-    thì nó mới cho thằng tác vụ about chạy
+- khi mà /about chạy hay / chạy thì middleware chạy trước đến khi `next()`
+  thì nó mới cho thằng tác vụ about chạy
 
 ta sẽ cài đặt một router vào dự án của mình
 trong index.ts ta khai báo thêm
@@ -301,13 +301,13 @@ const usersRouter = express.Router() //khai báo Router
 
 //viết  1 route giúp get data /tweets
 usersRouter.get('/tweets', (req, res) => {
-    res.json({
-        data: [
-            { fname: 'Điệp', yob: 1999 },
-            { fname: 'Hùng', yob: 2003 },
-            { fname: 'Được', yob: 1994 }
-        ]
-    })
+  res.json({
+    data: [
+      { fname: 'Điệp', yob: 1999 },
+      { fname: 'Hùng', yob: 2003 },
+      { fname: 'Được', yob: 1994 }
+    ]
+  })
 })
 app.use('/api', usersRouter)
 //app tổng sẽ dùng usersRouter trên nên ta sẽ có 1 đường dẫn là /api/tweets
@@ -323,8 +323,8 @@ phía trên `usersRouter ./tweets` ta thêm cái middleware(ngta hay còn gọi 
 ```ts
 //usersRouter sử dụng 1 middleware
 usersRouter.use((req, res, next) => {
-    console.log('Time: ', Date.now())
-    next()
+  console.log('Time: ', Date.now())
+  next()
 })
 ```
 
@@ -333,36 +333,36 @@ _nếu tắt next thì các hàm dưới sẽ không chạy_
 
 ### ta có thể có rất nhiều middleware
 
--   trong `index.ts` ta thêm 1 tý phần `middleware`
+- trong `index.ts` ta thêm 1 tý phần `middleware`
 
 ```ts
 //trước khi chạy các route của usersRouter thì nó sẽ chạy các middleware này trước
 usersRouter.use(
-    (req, res, next) => {
-        console.log('Time: ', Date.now())
-        next()
-    },
-    (req, res, next) => {
-        console.log('Time2: ', Date.now())
-        next()
-    }
+  (req, res, next) => {
+    console.log('Time: ', Date.now())
+    next()
+  },
+  (req, res, next) => {
+    console.log('Time2: ', Date.now())
+    next()
+  }
 )
 ```
 
--   giả sử ta xóa 1 next và thêm 1 cái status lỗi chẳng hạn
+- giả sử ta xóa 1 next và thêm 1 cái status lỗi chẳng hạn
 
 ```ts
 usersRouter.use(
-    (req, res, next) => {
-        console.log('Time: ', Date.now())
-        // next()
-        res.status(400).send('not allowed')
-        console.log(12345) //đoạn code này vẫn chạy, chỉ là server thấy, còn client k nhận đc
-    },
-    (req, res, next) => {
-        console.log('Time2: ', Date.now())
-        next()
-    }
+  (req, res, next) => {
+    console.log('Time: ', Date.now())
+    // next()
+    res.status(400).send('not allowed')
+    console.log(12345) //đoạn code này vẫn chạy, chỉ là server thấy, còn client k nhận đc
+  },
+  (req, res, next) => {
+    console.log('Time2: ', Date.now())
+    next()
+  }
 )
 ```
 
@@ -383,26 +383,26 @@ import { Router } from 'express'
 const usersRouter = Router()
 //middleware
 usersRouter.use(
-    (req, res, next) => {
-        console.log('Time: ', Date.now())
-        next()
-        // res.status(400).send('not allowed')
-        // console.log(12345)
-    },
-    (req, res, next) => {
-        console.log('Time 2: ', Date.now())
-        next()
-    }
+  (req, res, next) => {
+    console.log('Time: ', Date.now())
+    next()
+    // res.status(400).send('not allowed')
+    // console.log(12345)
+  },
+  (req, res, next) => {
+    console.log('Time 2: ', Date.now())
+    next()
+  }
 )
 //router
 usersRouter.get('/tweets', (req, res) => {
-    res.json({
-        data: [
-            { fname: 'Điệp', yob: 1999 },
-            { fname: 'Hùng', yob: 2003 },
-            { fname: 'Được', yob: 1994 }
-        ]
-    })
+  res.json({
+    data: [
+      { fname: 'Điệp', yob: 1999 },
+      { fname: 'Hùng', yob: 2003 },
+      { fname: 'Được', yob: 1994 }
+    ]
+  })
 })
 export default usersRouter
 ```
@@ -416,14 +416,14 @@ import usersRouter from './users.routes'
 const port = 3000
 
 app.get('/', (req, res) => {
-    res.send('hello world')
+  res.send('hello world')
 })
 
 //fix lại thành user luôn cho dỡ hack não
 //nên api lúc này là http://localhost:3000/user/tweets
 app.use('/user', usersRouter) //route handler
 app.listen(port, () => {
-    console.log(`Project twitter này đang chạy trên post ${port}`)
+  console.log(`Project twitter này đang chạy trên post ${port}`)
 })
 ```
 
@@ -503,275 +503,275 @@ Còn lại là những file config cho project như .eslintrc, .prettierrc, ... 
 
 ## Demo tổ chức thự mục
 
--   tạo trong **src** tạo 7 folder sau: **constants**, **controllers**, **middlewares**, **services**, **routes**, **utils**, **models**
+- tạo trong **src** tạo 7 folder sau: **constants**, **controllers**, **middlewares**, **services**, **routes**, **utils**, **models**
 
--   ta nhét file `users.routes.ts` vào thư mục **routes**
+- ta nhét file `users.routes.ts` vào thư mục **routes**
 
--   fix lại đường dẫn cho file index đoạn `import usersRouter from './routes/users.routes'` và `app.use('/users', usersRouter)`
+- fix lại đường dẫn cho file index đoạn `import usersRouter from './routes/users.routes'` và `app.use('/users', usersRouter)`
 
--   tách phần middlewares ra khỏi file `users.routes.ts`
+- tách phần middlewares ra khỏi file `users.routes.ts`
 
-    -   tạo trong middlewares file `users.middlewares.ts`
-    -   demo tạo 1 middlewares phục vụ kiểm tra login cho users
-        đoạn code trong file `users.middlewares.ts` như sau
+  - tạo trong middlewares file `users.middlewares.ts`
+  - demo tạo 1 middlewares phục vụ kiểm tra login cho users
+    đoạn code trong file `users.middlewares.ts` như sau
 
-        ```ts
-        ///import các interface để định dạng kiểu cho para của middlewares
-        import { Request, Response, NextFunction } from 'express'
+    ```ts
+    ///import các interface để định dạng kiểu cho para của middlewares
+    import { Request, Response, NextFunction } from 'express'
 
-        //1 req của client gữi lên server sẽ có body(chứa các thứ cẫn gữi)
-        export const loginValidator = (req: Request, res: Response, next: NextFunction) => {
-            // ta vào body lấy email, password ra
-            console.log(req.body) //log xem có gì
-            const { email, password } = req.body
-            if (!email || !password) {
-                return res.status(400).json({
-                    error: 'Missing email or password'
-                })
-            }
-            next()
-        }
-        ```
-
-    -   vào file `users.routes.ts`
-
-        ```ts
-        //khai báo
-        import { Router } from 'express'
-        const usersRouter = Router()
-
-        usersRouter.post('/login', (req, res) => {
-            res.json({
-                data: [
-                    { fname: 'Điệp', yob: 1999 },
-                    { fname: 'Hùng', yob: 2003 },
-                    { fname: 'Được', yob: 1994 }
-                ]
-            })
+    //1 req của client gữi lên server sẽ có body(chứa các thứ cẫn gữi)
+    export const loginValidator = (req: Request, res: Response, next: NextFunction) => {
+      // ta vào body lấy email, password ra
+      console.log(req.body) //log xem có gì
+      const { email, password } = req.body
+      if (!email || !password) {
+        return res.status(400).json({
+          error: 'Missing email or password'
         })
+      }
+      next()
+    }
+    ```
 
-        export default usersRouter
-        ```
+  - vào file `users.routes.ts`
 
-    -   test postman với routes vừa tạo, method là post, truyền data đầy đủ
-        để ý type là json nhé
-        ![Alt text](./attachments/image-8.png)
-    -   nếu data không đầy đủ thì nó vẫn sẽ lấy đc dữ liệu vì file route và file middlewares chưa liên kết gì vào nhau nên ta fix file `users.routes.ts` 1 tý
+    ```ts
+    //khai báo
+    import { Router } from 'express'
+    const usersRouter = Router()
 
-        ```ts
-        import { loginValidator } from '~/middlewares/users.middlewares'
-        usersRouter.post('/login', loginValidator, (req, res) => {
-            res.json({
-                //thay thành message cho đẹp
-                message: [
-                    { fname: 'Điệp', yob: 1999 },
-                    { fname: 'Hùng', yob: 2003 },
-                    { fname: 'Được', yob: 1994 }
-                ]
-            })
+    usersRouter.post('/login', (req, res) => {
+      res.json({
+        data: [
+          { fname: 'Điệp', yob: 1999 },
+          { fname: 'Hùng', yob: 2003 },
+          { fname: 'Được', yob: 1994 }
+        ]
+      })
+    })
+
+    export default usersRouter
+    ```
+
+  - test postman với routes vừa tạo, method là post, truyền data đầy đủ
+    để ý type là json nhé
+    ![Alt text](./attachments/image-8.png)
+  - nếu data không đầy đủ thì nó vẫn sẽ lấy đc dữ liệu vì file route và file middlewares chưa liên kết gì vào nhau nên ta fix file `users.routes.ts` 1 tý
+
+    ```ts
+    import { loginValidator } from '~/middlewares/users.middlewares'
+    usersRouter.post('/login', loginValidator, (req, res) => {
+      res.json({
+        //thay thành message cho đẹp
+        message: [
+          { fname: 'Điệp', yob: 1999 },
+          { fname: 'Hùng', yob: 2003 },
+          { fname: 'Được', yob: 1994 }
+        ]
+      })
+    })
+    ```
+
+  - giờ ta test lại postman sẽ thấy lỗi `TypeError: Cannot destructure property 'email' of 'req.body' as it is undefined.` vì dữ liệu được truyền lên là json, ta nên cấu hình cho server khi nhận json thì sẽ tự parse bằng cách vào file **index.ts** thêm dòng này
+    ```ts
+    app.use(express.json()) //app handler
+    ```
+
+- tách controller
+
+  - trong `users.routes.ts` đoạn
+
+    ```ts
+    usersRouter.post('/login', loginValidator, (req, res) => {
+      res.json({
+        //thay thành message cho đẹp
+        message: [
+          { fname: 'Điệp', yob: 1999 },
+          { fname: 'Hùng', yob: 2003 },
+          { fname: 'Được', yob: 1994 }
+        ]
+      })
+    })
+    ```
+
+    phần hàm là controller , ta sẽ tách nó ra làm 1 file riêng và cất vào folder controller
+
+  - tạo file `users.controllers.ts` trong **controller** nội dung
+
+    ```ts
+    import { Request, Response } from 'express'
+    export const loginController = (req: Request, res: Response) => {
+      const { email, password } = req.body
+      if (email === 'lehodiep.1999@gmail.com' && password === '123123123') {
+        return res.json({
+          data: [
+            { fname: 'Điệp', yob: 1999 },
+            { fname: 'Hùng', yob: 2003 },
+            { fname: 'Được', yob: 1994 }
+          ]
         })
-        ```
-
-    -   giờ ta test lại postman sẽ thấy lỗi `TypeError: Cannot destructure property 'email' of 'req.body' as it is undefined.` vì dữ liệu được truyền lên là json, ta nên cấu hình cho server khi nhận json thì sẽ tự parse bằng cách vào file **index.ts** thêm dòng này
-        ```ts
-        app.use(express.json()) //app handler
-        ```
-
--   tách controller
-
-    -   trong `users.routes.ts` đoạn
-
-        ```ts
-        usersRouter.post('/login', loginValidator, (req, res) => {
-            res.json({
-                //thay thành message cho đẹp
-                message: [
-                    { fname: 'Điệp', yob: 1999 },
-                    { fname: 'Hùng', yob: 2003 },
-                    { fname: 'Được', yob: 1994 }
-                ]
-            })
+      } else {
+        return res.status(400).json({
+          error: 'login failed'
         })
-        ```
+      }
+    }
+    ```
 
-        phần hàm là controller , ta sẽ tách nó ra làm 1 file riêng và cất vào folder controller
+  - file `users.routes.ts` fix thành
 
-    -   tạo file `users.controllers.ts` trong **controller** nội dung
+    ```ts
+    import { loginController } from '~/controllers/users.controllers'
+    usersRouter.post('/login', loginValidator, loginController)
+    ```
 
-        ```ts
-        import { Request, Response } from 'express'
-        export const loginController = (req: Request, res: Response) => {
-            const { email, password } = req.body
-            if (email === 'lehodiep.1999@gmail.com' && password === '123123123') {
-                return res.json({
-                    data: [
-                        { fname: 'Điệp', yob: 1999 },
-                        { fname: 'Hùng', yob: 2003 },
-                        { fname: 'Được', yob: 1994 }
-                    ]
-                })
-            } else {
-                return res.status(400).json({
-                    error: 'login failed'
-                })
-            }
-        }
-        ```
+    và kiểm tra qua postman
 
-    -   file `users.routes.ts` fix thành
-
-        ```ts
-        import { loginController } from '~/controllers/users.controllers'
-        usersRouter.post('/login', loginValidator, loginController)
-        ```
-
-        và kiểm tra qua postman
-
-    -   tóm lại mô hình đầy đủ sẽ như thế này
-        ![Alt text](./attachments/image-10.png)
+  - tóm lại mô hình đầy đủ sẽ như thế này
+    ![Alt text](./attachments/image-10.png)
 
 quy trình ![Alt text](./attachments/image-6.png)
 app handler > route handler gồm: middleware > controller > service > trả ra kết quả
 
 # IV - kết nối mongo Atlas bằng MongoDB Driver
 
--   mình sẽ dùng mongoDB( tên đầy đủ là mongoDB Nodejs Driver) để kết nối mongo với dự án của mình, đây là 1 thư viện chính thức của mongo
-    (những lựa chọn khác như mongoes, prisma)
+- mình sẽ dùng mongoDB( tên đầy đủ là mongoDB Nodejs Driver) để kết nối mongo với dự án của mình, đây là 1 thư viện chính thức của mongo
+  (những lựa chọn khác như mongoes, prisma)
 
--   tạo csdl cho dự án twitter
+- tạo csdl cho dự án twitter
 
-    -   vào mongo tạo 1 Projects mới
-        ![Alt text](./attachments/image-11.png)
+  - vào mongo tạo 1 Projects mới
+    ![Alt text](./attachments/image-11.png)
 
-    -   tại một clutter mới
-        ![Alt text](./attachments/image-12.png)
-        ![Alt text](./attachments/image-13.png)
+  - tại một clutter mới
+    ![Alt text](./attachments/image-12.png)
+    ![Alt text](./attachments/image-13.png)
 
-    -   tạo 1 database tên `twitter-dev` và collection `users`
-        ![Alt text](./attachments/image-14.png)
+  - tạo 1 database tên `twitter-dev` và collection `users`
+    ![Alt text](./attachments/image-14.png)
 
 ## 1 - Connect mongo với compass
 
--   vào task `overview > connect > compass` và làm theo các bước cài đặt
-    ![Alt text](./attachments/image-16.png)
+- vào task `overview > connect > compass` và làm theo các bước cài đặt
+  ![Alt text](./attachments/image-16.png)
 
--   copy đường dẫn và chèn vào app mongo compass để kết nối
-    mongodb+srv://lehodiep1999:<password>@twitter.zhww2g8.mongodb.net/
-    ![Alt text](./attachments/image-17.png)
+- copy đường dẫn và chèn vào app mongo compass để kết nối
+  mongodb+srv://lehodiep1999:<password>@twitter.zhww2g8.mongodb.net/
+  ![Alt text](./attachments/image-17.png)
 
--   kết quả ta có
-    ![Alt text](./attachments/image-18.png)
+- kết quả ta có
+  ![Alt text](./attachments/image-18.png)
 
 ## 2 - Connect mongo với nodejs
 
--   vào task `overview > connect > driver` và làm theo các bước cài đặt
-    ![Alt text](./attachments/image-15.png)
+- vào task `overview > connect > driver` và làm theo các bước cài đặt
+  ![Alt text](./attachments/image-15.png)
 
--   ```bash
-    npm i mongodb
-    ```
--   copy phần code connect mẫu
-    ![Alt text](./attachments/image-19.png)
+- ```bash
+  npm i mongodb
+  ```
+- copy phần code connect mẫu
+  ![Alt text](./attachments/image-19.png)
 
--   vì liên quan đến database nên ta sẽ tạo 1 file tên `database.services.ts` trong services
--   thay thế cú pháp required bằng import, và cung cấp password cho đường link
--   file `database.services.ts` sẽ thế này
+- vì liên quan đến database nên ta sẽ tạo 1 file tên `database.services.ts` trong services
+- thay thế cú pháp required bằng import, và cung cấp password cho đường link
+- file `database.services.ts` sẽ thế này
 
-    ```ts
-    //xóa bớt mấy cái k dùng
-    import { MongoClient } from 'mongodb'
-    const uri = 'mongodb+srv://lehodiep1999:lehodiep123123@twitter.zhww2g8.mongodb.net/?retryWrites=true&w=majority'
+  ```ts
+  //xóa bớt mấy cái k dùng
+  import { MongoClient } from 'mongodb'
+  const uri = 'mongodb+srv://lehodiep1999:lehodiep123123@twitter.zhww2g8.mongodb.net/?retryWrites=true&w=majority'
 
-    const client = new MongoClient(uri)
+  const client = new MongoClient(uri)
 
-    export async function run() {
+  export async function run() {
+    try {
+      // kết nối mình với server mongo	(optional từ phiên bản 4.7 nên mình xóa đi cũng oke)
+      // await client.connect()
+      // gữi tính hiệu kết nối lên server
+      await client.db('admin').command({ ping: 1 })
+      console.log('Pinged your deployment. You successfully connected to MongoDB!')
+    }
+  }
+  ```
+
+- chuẩn bị file xong thì ta sẽ vào file server của mình (`index.ts`) để xài hàm run bên `database.services.ts`
+
+  - bên file `index.ts` ta thêm
+
+  ```ts
+  import { run } from './services/database.services'
+  run().catch(console.dir)
+  //run().catch(console.log(dir)) tương tự
+  ```
+
+  - chạy thử
+
+  ```bash
+  npm run dev
+  ```
+
+- chuyển đổi file `database.services.ts` về thành class
+
+  ```ts
+  import { MongoClient } from 'mongodb'
+  const uri = 'mongodb+srv://lehodiep1999:lehodiep123123@twitter.zhww2g8.mongodb.net/?retryWrites=true&w=majority'
+
+  class DatabaseService {
+    private client: MongoClient
+    constructor() {
+      this.client = new MongoClient(uri)
+    }
+    async connect() {
       try {
         // kết nối mình với server mongo	(optional từ phiên bản 4.7 nên mình xóa đi cũng oke)
         // await client.connect()
         // gữi tính hiệu kết nối lên server
-        await client.db('admin').command({ ping: 1 })
+        await this.client.db('admin').command({ ping: 1 })
         console.log('Pinged your deployment. You successfully connected to MongoDB!')
-      }
+      } catch (error) {
+        console.log(error)
+        throw error
+      } // finally {
+      // Ensures that the client will close when you finish/error
+      //await this.client.close()
+      //} // k dùng finally vì như vậy sau khi kết nối nó sẽ đóng lại luôn,
+      //và mình sẽ k thể gữi request đc nữa
     }
-    ```
+  }
 
--   chuẩn bị file xong thì ta sẽ vào file server của mình (`index.ts`) để xài hàm run bên `database.services.ts`
+  //từ class tạo object và export nó ra ngoài
+  const databaseService = new DatabaseService()
+  export default databaseService
+  ```
 
-    -   bên file `index.ts` ta thêm
+  - fix lại cách xài bên `index.ts`
 
-    ```ts
-    import { run } from './services/database.services'
-    run().catch(console.dir)
-    //run().catch(console.log(dir)) tương tự
-    ```
+  ```ts
+  import databaseService from './services/database.services'
+  databaseService.connect()
+  ```
 
-    -   chạy thử
+- trên thực tế người ta thường tách url này thành các biến để để dàng tương thích với nhiều database khác nhau, các biến được tách ra và lưu vào file `.env`, nên giờ sẽ tạo file `.env` ở lớp ngoài cùng của dự án và tiến hành
+  tách url `const uri = 'mongodb+srv://lehodiep1999:lehodiep123123@twitter.zhww2g8.mongodb.net/?retryWrites=true&w=majority'`
 
-    ```bash
-    npm run dev
-    ```
+  - file `.env`
 
--   chuyển đổi file `database.services.ts` về thành class
+  ```ts
+  DB_USERNAME = 'lehodiep1999'
+  DB_PASSWORD = 'lehodiep123123'
+  ```
 
-    ```ts
-    import { MongoClient } from 'mongodb'
-    const uri = 'mongodb+srv://lehodiep1999:lehodiep123123@twitter.zhww2g8.mongodb.net/?retryWrites=true&w=majority'
+  -cài thêm thư viện `npm i dotenv`
 
-    class DatabaseService {
-        private client: MongoClient
-        constructor() {
-            this.client = new MongoClient(uri)
-        }
-        async connect() {
-            try {
-                // kết nối mình với server mongo	(optional từ phiên bản 4.7 nên mình xóa đi cũng oke)
-                // await client.connect()
-                // gữi tính hiệu kết nối lên server
-                await this.client.db('admin').command({ ping: 1 })
-                console.log('Pinged your deployment. You successfully connected to MongoDB!')
-            } catch (error) {
-                console.log(error)
-                throw error
-            } // finally {
-            // Ensures that the client will close when you finish/error
-            //await this.client.close()
-            //} // k dùng finally vì như vậy sau khi kết nối nó sẽ đóng lại luôn,
-            //và mình sẽ k thể gữi request đc nữa
-        }
-    }
+  - file `database.services.ts` ta fix thành
 
-    //từ class tạo object và export nó ra ngoài
-    const databaseService = new DatabaseService()
-    export default databaseService
-    ```
+  ```ts
+  import dotenv from 'dotenv'
+  dotenv.config()
 
-    -   fix lại cách xài bên `index.ts`
+  //console.log(process.env.DB_USERNAME) // lúc này thì dòng lệnh này sẽ chạy đc
+  const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@twitter.zhww2g8.mongodb.net/?retryWrites=true&w=majority`
+  ```
 
-    ```ts
-    import databaseService from './services/database.services'
-    databaseService.connect()
-    ```
-
--   trên thực tế người ta thường tách url này thành các biến để để dàng tương thích với nhiều database khác nhau, các biến được tách ra và lưu vào file `.env`, nên giờ sẽ tạo file `.env` ở lớp ngoài cùng của dự án và tiến hành
-    tách url `const uri = 'mongodb+srv://lehodiep1999:lehodiep123123@twitter.zhww2g8.mongodb.net/?retryWrites=true&w=majority'`
-
-    -   file `.env`
-
-    ```ts
-    DB_USERNAME = 'lehodiep1999'
-    DB_PASSWORD = 'lehodiep123123'
-    ```
-
-    -cài thêm thư viện `npm i dotenv`
-
-    -   file `database.services.ts` ta fix thành
-
-    ```ts
-    import dotenv from 'dotenv'
-    dotenv.config()
-
-    //console.log(process.env.DB_USERNAME) // lúc này thì dòng lệnh này sẽ chạy đc
-    const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@twitter.zhww2g8.mongodb.net/?retryWrites=true&w=majority`
-    ```
-
--   sau này push code lên dừng push file `.env` nha, vì nó chứa toàn thông tin password quan trọng
+- sau này push code lên dừng push file `.env` nha, vì nó chứa toàn thông tin password quan trọng

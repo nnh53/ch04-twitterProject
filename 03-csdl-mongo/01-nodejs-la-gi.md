@@ -24,7 +24,7 @@ k quan tâm
 
 - Node.js nhanh hơn PHP
 
-- Mặc dù tốc độ thua Java, .Net, Go (nodejs thua gấp đôi) nhưng thực tế chúng ta không cần nhiều tốc độ đến thế. [Stack Exchange chỉ thực thi 300 req/  s](https://stackexchange.com/performance), Fastify của Node.js có thể cho ra **45659 req/s**, và express là **9888 req/sec** (tất nhiên tùy vào bài test nhưng nó đủ đáp ứng nhu cầu chúng ta)
+- Mặc dù tốc độ thua Java, .Net, Go (nodejs thua gấp đôi) nhưng thực tế chúng ta không cần nhiều tốc độ đến thế. [Stack Exchange chỉ thực thi 300 req/ s](https://stackexchange.com/performance), Fastify của Node.js có thể cho ra **45659 req/s**, và express là **9888 req/sec** (tất nhiên tùy vào bài test nhưng nó đủ đáp ứng nhu cầu chúng ta)
 
 - Hầu hết các nút thắc cổ chai ở server nằm ở database chứ ít khi nằm ở ngôn ngữ chúng ta chọn
 
@@ -92,16 +92,16 @@ commonjs là module mặc định, `Esmodule` là sau này mới có
   - trong `test-module` tạo file `utils.js`
 
     ```js
-    const sum = (a, b) => a + b;
-    exports.sum = sum;
+    const sum = (a, b) => a + b
+    exports.sum = sum
     ```
 
   - tạo file `main.js`
 
     ```js
-    const utitls = require("./utils.js");
-    console.log("main.js nè");
-    console.log(utitls.sum(1, 5));
+    const utitls = require('./utils.js')
+    console.log('main.js nè')
+    console.log(utitls.sum(1, 5))
     ```
 
 - chạy thử bằng node
@@ -134,20 +134,20 @@ commonjs là module mặc định, `Esmodule` là sau này mới có
 
     ```js
     const logName = () => {
-      console.log("xin chào mọi người");
-    };
-    export const sum = (a, b) => a + b;
-    export default logName;
+      console.log('xin chào mọi người')
+    }
+    export const sum = (a, b) => a + b
+    export default logName
     ```
 
   - tạo file `index.js` để xài hàm của `helper.js`
 
     ```js
-    import logName, { sum } from "./helper.js";
+    import logName, { sum } from './helper.js'
 
-    logName();
+    logName()
 
-    console.log(sum(1, 5));
+    console.log(sum(1, 5))
     ```
 
   - chạy thử để xem kết quả
@@ -205,9 +205,9 @@ npm i nodemon -g
 - tạo file `index.js`
 
   ```js
-  const sum = (a, b) => a + b;
+  const sum = (a, b) => a + b
 
-  console.log(sum(1, 2));
+  console.log(sum(1, 2))
   ```
 
 - mỗi lần mình thay đổi code , mình phải chạy lại cái `node index.js` để xem kết quả rất mệt

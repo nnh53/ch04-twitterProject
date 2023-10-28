@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { loginController } from '~/controllers/users.controllers'
 import { loginValidator, registerValidator } from '~/middlewares/users.middlewares'
 import { registerController } from '~/controllers/users.controllers'
-import { register } from 'module'
+import { wrapAsync } from '~/utils/handlers'
 
 const userRouter = Router()
 
@@ -18,9 +18,31 @@ const userRouter = Router()
 //   // }
 // )
 
+/*
+des: đăng nhập 
+path: /users/login
+method: POST
+body: { 
+  email, 
+  password
+}
+*/
+
 userRouter.get('/login', loginValidator, loginController)
 
-// userRouter.post('/register', registerValidator, registerController) //đúng ra là phải thêm có validator
-userRouter.post('/register', registerController) //đúng ra là phải thêm có validator
+/*
+des: đăng ký
+path: /users/register
+method: POST
+body: {
+  name, 
+  email, 
+  password,
+  confirm_password
+  data_of_birth
+}
+*/
+
+userRouter.post('/register', registerValidator, wrapAsync(registerController)) //đúng ra là phải thêm có validator
 
 export default userRouter
