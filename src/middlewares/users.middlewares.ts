@@ -33,7 +33,7 @@ export const loginValidator = validate(
           if (user === null) {
             throw new Error(USERS_MESSAGES.EMAIL_OR_PASSWORD_IS_INCORRECT)
           }
-          req.user = user
+          req.user = user // req ơi, giữ giùm cái error nhé
           return true
         }
       }

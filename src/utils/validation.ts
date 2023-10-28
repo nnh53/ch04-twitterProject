@@ -28,6 +28,7 @@ export const validate = (validation: RunnableValidationChains<ValidationChain>) 
       }
 
       // lưu các lỗi 422 từ errorObject vào entityError
+      // xuống đây thì m là 422
       entityError.errors[key] = msg
     }
 

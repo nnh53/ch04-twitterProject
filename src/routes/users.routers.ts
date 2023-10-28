@@ -28,7 +28,7 @@ body: {
 }
 */
 
-userRouter.get('/login', loginValidator, loginController)
+userRouter.get('/login', loginValidator, wrapAsync(loginController))
 
 /*
 des: đăng ký
