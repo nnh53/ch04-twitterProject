@@ -1,4 +1,4 @@
-# **_đối với bài này ta sẽ demo bằng 1 folder dự án khác, không phải ch04-twitterProject_**
+# đối với bài này ta sẽ demo bằng 1 folder dự án khác, không phải ch04-twitterProject
 
 tạo thư mục `test-express-validator`
 

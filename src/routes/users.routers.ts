@@ -2,9 +2,11 @@ import { Router } from 'express'
 import {
   emailVerifyController,
   forgotPasswordController,
+  getMeController,
   loginController,
   logoutController,
   resendEmailVerifyController,
+  resetPasswordController,
   verifyForgotPasswordController
 } from '~/controllers/users.controllers'
 import {
@@ -14,15 +16,16 @@ import {
   loginValidator,
   refreshTokenValidator,
   registerValidator,
+  resetPasswordValidator,
   verifyForgotPasswordTokenValidator
 } from '~/middlewares/users.middlewares'
 import { registerController } from '~/controllers/users.controllers'
 import { wrapAsync } from '~/utils/handlers'
 import { verify } from 'crypto'
 
-const userRouter = Router()
+const usersRouter = Router()
 
-// userRouter.use(
+// usersRouter.use(
 //   (req, res, next) => {
 //     console.log('Time', Date.now())
 //     // return res.status(400).send('đồ ngu')
@@ -43,8 +46,7 @@ body: {
   password
 }
 */
-
-userRouter.get('/login', loginValidator, wrapAsync(loginController))
+usersRouter.get('/login', loginValidator, wrapAsync(loginController))
 
 /*
 des: đăng ký
@@ -58,10 +60,9 @@ body: {
   data_of_birth
 }
 */
+usersRouter.post('/register', registerValidator, wrapAsync(registerController)) //đúng ra là phải thêm có validator
 
-userRouter.post('/register', registerValidator, wrapAsync(registerController)) //đúng ra là phải thêm có validator
-
-userRouter.post('/logout', accessTokenValidator, refreshTokenValidator, wrapAsync(logoutController))
+usersRouter.post('/logout', accessTokenValidator, refreshTokenValidator, wrapAsync(logoutController))
 
 /*
 des: email verify token  
@@ -82,8 +83,7 @@ body: {
   email_verify_token: string  
 }
 */
-
-userRouter.post('/verify-email', emailVerifyTokenValidator, wrapAsync(emailVerifyController))
+usersRouter.post('/verify-email', emailVerifyTokenValidator, wrapAsync(emailVerifyController))
 
 /*
 des: resend email verify token
@@ -94,8 +94,7 @@ path: /users/resend-verify-email
 headers: {Authorization : "Bearer <access_token>"} //đăng nhập mới đc resend 
 body: {}
 */
-
-userRouter.post('/resend-verify-email', accessTokenValidator, wrapAsync(resendEmailVerifyController))
+usersRouter.post('/resend-verify-email', accessTokenValidator, wrapAsync(resendEmailVerifyController))
 
 /*
 des: khi ng dùng quên mật khẩu, họ gửi email để xin mình tạo cho họ forgot_password_token
@@ -105,19 +104,40 @@ body: {
   email: string
 }
 */
-
-userRouter.post('/forgot-password', forgotPasswordValidator, wrapAsync(forgotPasswordController))
+usersRouter.post('/forgot-password', forgotPasswordValidator, wrapAsync(forgotPasswordController))
 
 /*
 des: khi ng dùng nhấp vào link trong mail để reset password
 họ sẽ gửi req kèm theo forgot_password_token lên 
-
  */
 
-userRouter.post(
+usersRouter.post(
   '/verify-forgot-password',
   verifyForgotPasswordTokenValidator,
   wrapAsync(verifyForgotPasswordController)
 )
 
-export default userRouter
+/*
+des: reset password
+path: '/reset-password'
+method: POST
+Header: không cần, vì  ngta quên mật khẩu rồi, thì sao mà đăng nhập để có auth đc
+body: {forgot_password_token: string, password: string, confirm_password: string}
+*/
+usersRouter.post(
+  '/reset-password',
+  resetPasswordValidator,
+  verifyForgotPasswordTokenValidator,
+  wrapAsync(resetPasswordController)
+)
+
+/*
+des: get profile của user
+path: '/me'
+method: get
+Header: {Authorization: Bearer <access_token>}
+body: {}
+*/
+usersRouter.get('/me', accessTokenValidator, wrapAsync(getMeController))
+
+export default usersRouter

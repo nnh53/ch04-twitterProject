@@ -1,4 +1,6 @@
 export const USERS_MESSAGES = {
+  GET_ME_SUCCESS: 'Get me success',
+  RESET_PASSWORD_SUCCESS: 'Reset password success',
   VALIDATION_ERROR: 'Validation error',
   //name
   NAME_IS_REQUIRED: 'Name is required',
