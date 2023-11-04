@@ -11,8 +11,11 @@ const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}
 class DatabaseService {
   private client: MongoClient
   private db: Db
+
   constructor() {
     this.client = new MongoClient(uri)
+
+    // tạo ra một bản thể của database mình đang muốn kết nối tới
     this.db = this.client.db(`${process.env.DB_NAME}`)
   }
 
@@ -26,6 +29,7 @@ class DatabaseService {
     }
   }
 
+  // tức là databaseService.users sẽ trả về một collection luôn
   get users(): Collection<User> {
     return this.db.collection(process.env.DB_COLLECTION_USERS as string)
   }

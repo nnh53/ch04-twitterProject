@@ -287,7 +287,7 @@ trên thực tế app.get chỉ dành cho các routing tổng mà thôi
 nếu ta cần chia nhỏ các bộ routing như dự án của mình ta phải **express.Router**
 
 **middleware**: là 1 tác vụ được chạy trước khi thực hiện các tác vụ khác
-![Alt text](./attachments/./attachments/image-1.png)
+![Alt text](./attachments/image-1.png)
 _hình trên doc của express_
 
 - khi mà /about chạy hay / chạy thì middleware chạy trước đến khi `next()`
