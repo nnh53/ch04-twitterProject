@@ -60,13 +60,7 @@ class UsersService {
   }
 
   // ký access_token và refresh_token
-  private signAccessAndRefreshToken({
-    user_id,
-    verify
-  }: {
-    user_id: string
-    verify: UserVerifyStatus
-  }) {
+  private signAccessAndRefreshToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
     return Promise.all([
       this.signAccessToken({ user_id, verify }),
       this.signRefreshToken({ user_id, verify })
@@ -187,13 +181,7 @@ class UsersService {
   }
 
   // hàm signEmailVerifyToken
-  private signForgotPasswordToken({
-    user_id,
-    verify
-  }: {
-    user_id: string
-    verify: UserVerifyStatus
-  }) {
+  private signForgotPasswordToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
     return signToken({
       payload: {
         user_id,
@@ -326,6 +314,24 @@ class UsersService {
       })
     )
     return { message: USERS_MESSAGES.FOLLOW_SUCCESS }
+  }
+
+  async unfollow(user_id: string, followed_user_id: string) {
+    // kiểm tra mình đã follow chưa
+    const isFollowed = await databaseService.followers.findOne({
+      user_id: new ObjectId(user_id),
+      followed_user_id: new ObjectId(followed_user_id)
+    })
+
+    if (!isFollowed) {
+      return USERS_MESSAGES.USER_ALREADY_UNFOLLOWED
+    }
+
+    await databaseService.followers.deleteOne({
+      user_id: new ObjectId(user_id),
+      followed_user_id: new ObjectId(followed_user_id)
+    })
+    return { message: USERS_MESSAGES.UNFOLLOW_SUCCESS }
   }
 }
 

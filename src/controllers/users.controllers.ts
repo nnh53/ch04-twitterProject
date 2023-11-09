@@ -3,11 +3,13 @@ import { NextFunction, Request, Response } from 'express'
 import userService from '~/services/users.services'
 import {
   FollowReqBody,
+  GetProfileReqParams,
   LoginReqBody,
   LogoutReqBody,
   RegisterReqBody,
   ResetPasswordBody,
   TokenPayload,
+  UnfollowReqParams,
   UpdateMeReqBody,
   VerifyEmailReqBody
 } from '~/models/requests/Users.request'
@@ -32,7 +34,10 @@ export const loginController = async (req: Request<ParamsDictionary, any, LoginR
   res.json({ message: USERS_MESSAGES.LOGIN_SUCCESS, result })
 }
 
-export const registerController = async (req: Request<ParamsDictionary, any, RegisterReqBody>, res: Response) => {
+export const registerController = async (
+  req: Request<ParamsDictionary, any, RegisterReqBody>,
+  res: Response
+) => {
   // const { email, password, confirm_password,  } = req.body
   // nhét vô database
   const result = await userService.register(req.body)
@@ -48,7 +53,10 @@ export const logoutController = async (req: Request<ParamsDictionary, any, Logou
   res.json(result)
 }
 
-export const emailVerifyController = async (req: Request<ParamsDictionary, any, VerifyEmailReqBody>, res: Response) => {
+export const emailVerifyController = async (
+  req: Request<ParamsDictionary, any, VerifyEmailReqBody>,
+  res: Response
+) => {
   // nếu mà code vào đc đây nghĩa là email_verify_token hợp lệ
   // và mình đã lấy đc decoded_email_verify_token từ middleware emailVerifyTokenValidator
 
@@ -123,7 +131,10 @@ export const forgotPasswordController = async (req: Request, res: Response) => {
   const { _id, verify } = req.user as User
 
   // dùng _id tìm và cập nhật lại user thêm vào forgot_password_token
-  const result = await userService.forgotPassword({ user_id: (_id as ObjectId).toString(), verify: verify })
+  const result = await userService.forgotPassword({
+    user_id: (_id as ObjectId).toString(),
+    verify: verify
+  })
 
   return res.json(result)
 }
@@ -155,7 +166,10 @@ export const getMeController = async (req: Request, res: Response) => {
   })
 }
 
-export const updateMeController = async (req: Request<ParamsDictionary, any, UpdateMeReqBody>, res: Response) => {
+export const updateMeController = async (
+  req: Request<ParamsDictionary, any, UpdateMeReqBody>,
+  res: Response
+) => {
   // muốn update thông tin của user thì cần user_id và thông tin ngta muốn update
 
   // lấy thông tin user từ req.user
@@ -171,7 +185,11 @@ export const updateMeController = async (req: Request<ParamsDictionary, any, Upd
   })
 }
 
-export const getProfileController = async (req: Request, res: Response, next: NextFunction) => {
+export const getProfileController = async (
+  req: Request<GetProfileReqParams>,
+  res: Response,
+  next: NextFunction
+) => {
   // muốn lấy thông tin user thì cần username
 
   const { username } = req.params //lấy username từ query params
@@ -190,5 +208,19 @@ export const followController = async (
   const { user_id } = req.decoded_authorization as TokenPayload //lấy user_id từ decoded_authorization của access_token trong req
   const { followed_user_id } = req.body //lấy followed_user_id từ req.body
   const result = await userService.follow(user_id, followed_user_id)
+  return res.json(result)
+}
+
+export const unfollowController = async (
+  req: Request<UnfollowReqParams>,
+  res: Response,
+  next: NextFunction
+) => {
+  // lấy ra user_id người muốn thực hiện hành động unfollow
+  const { user_id } = req.decoded_authorization as TokenPayload
+  // lấy ra người mà mình muốn unfollow
+  const { user_id: followed_user_id } = req.params
+  // gọi hàm unfollow
+  const result = await userService.unfollow(user_id, followed_user_id)
   return res.json(result)
 }

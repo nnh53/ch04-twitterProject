@@ -1,3 +1,4 @@
+import { ParamsDictionary } from 'express-serve-static-core'
 import { getProfileController } from './../../controllers/users.controllers'
 import { verify } from 'crypto'
 import { JwtPayload } from 'jsonwebtoken'
@@ -48,10 +49,14 @@ export interface UpdateMeReqBody {
 }
 //vì đây là route patch nên ngta truyền thiếu 1 trong các prop trên cũng k sao
 
-export interface getProfileReqParams {
+export interface GetProfileReqParams extends ParamsDictionary {
   username: string
 }
 
 export interface FollowReqBody {
   followed_user_id: string
+}
+
+export interface UnfollowReqParams extends ParamsDictionary {
+  user_id: string
 }

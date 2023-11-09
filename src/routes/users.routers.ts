@@ -9,6 +9,7 @@ import {
   logoutController,
   resendEmailVerifyController,
   resetPasswordController,
+  unfollowController,
   updateMeController,
   verifyForgotPasswordController
 } from '~/controllers/users.controllers'
@@ -21,6 +22,7 @@ import {
   refreshTokenValidator,
   registerValidator,
   resetPasswordValidator,
+  unfollowValidator,
   updateMeValidator,
   verifiedUserValidator,
   verifyForgotPasswordTokenValidator
@@ -185,9 +187,32 @@ method: post
 header: {Authorization: Bearer <access_token>}
 body: {followed_user_id: string}
 */
-usersRouter.post('/follow/', accessTokenValidator, verifiedUserValidator, followValidator, wrapAsync(followController))
+
+usersRouter.post(
+  '/follow',
+  accessTokenValidator,
+  verifiedUserValidator,
+  followValidator,
+  wrapAsync(followController)
+)
 // verifiedUserValidator: người dùng phải xác thực email rồi mới đc follow người khác
 // followValidator: người dùng không thể follow chính mình,kiểm tra có đúng định dạng ObjectId, account có tồn tại hay không
 // followController: kiểm tra xem đã follow chưa, tạo document vào collection followers
 
+/*
+des: unfollow người khác
+path: '/unfollow/:user_id'
+method: delete
+header: {Authorization: Bearer <access_token>}
+body: {}
+*/
+// DO DÙNG METHOD DELETE NÊN PHẢI TRUYỀN QUA PARAMS
+
+usersRouter.delete(
+  '/unfollow/:user_id',
+  accessTokenValidator,
+  verifiedUserValidator,
+  unfollowValidator,
+  wrapAsync(unfollowController)
+)
 export default usersRouter

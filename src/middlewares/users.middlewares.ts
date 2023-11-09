@@ -10,7 +10,7 @@ import { hashPassword } from '~/utils/crypto'
 import { verifyToken } from '~/utils/jwt'
 import { JsonWebTokenError } from 'jsonwebtoken'
 import HTTP_STATUS from '~/constants/httpStatus'
-import { capitalize } from 'lodash'
+import _, { capitalize } from 'lodash'
 import { ObjectId } from 'mongodb'
 import { TokenPayload } from '~/models/requests/Users.request'
 import { TokenType, UserVerifyStatus } from '~/constants/enums'
@@ -119,6 +119,39 @@ const dateOfBirthSchema: ParamSchema = {
   errorMessage: USERS_MESSAGES.DATE_OF_BIRTH_BE_ISO8601
 }
 
+const userIdSchema: ParamSchema = {
+  custom: {
+    options: async (value, { req }) => {
+      // check value có phải ObjectId hay không
+      if (!ObjectId.isValid(value)) {
+        throw new ErrorWithStatus({
+          message: USERS_MESSAGES.INVALID_USER_ID,
+          status: HTTP_STATUS.NOT_FOUND
+        })
+      }
+
+      // kiểm tra xem người dùng có tồn tại hay không
+      const user = await databaseService.users.findOne({ _id: new ObjectId(value) })
+
+      if (user === null) {
+        throw new ErrorWithStatus({
+          message: USERS_MESSAGES.USER_NOT_FOUND,
+          status: HTTP_STATUS.NOT_FOUND
+        })
+      }
+
+      // kiểm tra xem người dùng có tự follow chính mình hay không
+      if (user._id.toString() === req.decoded_authorization.user_id) {
+        throw new ErrorWithStatus({
+          message: USERS_MESSAGES.CANNOT_FOLLOW_YOURSELF,
+          status: HTTP_STATUS.FORBIDDEN
+        })
+      }
+      return true
+    }
+  }
+}
+
 export const loginValidator = validate(
   checkSchema(
     {
@@ -225,7 +258,10 @@ export const accessTokenValidator = validate(
           options: async (value, { req }) => {
             const accessToken = value.split(' ')[1]
             if (!accessToken) {
-              throw new ErrorWithStatus({ message: USERS_MESSAGES.ACCESS_TOKEN_IS_REQUIRED, status: 401 })
+              throw new ErrorWithStatus({
+                message: USERS_MESSAGES.ACCESS_TOKEN_IS_REQUIRED,
+                status: 401
+              })
             }
             // nếu xuống đc đây thì tức là access_token có rồi
             // cần verify access_token và lấy payload ra lưu lại trong req
@@ -263,7 +299,10 @@ export const refreshTokenValidator = validate(
           // cần verify refresh_token và lấy payload ra lưu lại trong req
           try {
             const [decoded_refresh_token, refresh_token] = await Promise.all([
-              verifyToken({ token: value, publicOrSecretKey: process.env.JWT_SECRET_REFRESH_TOKEN as string }),
+              verifyToken({
+                token: value,
+                publicOrSecretKey: process.env.JWT_SECRET_REFRESH_TOKEN as string
+              }),
               databaseService.refreshTokens.findOne({
                 token: value
               })
@@ -537,38 +576,18 @@ export const followValidator = validate(
           errorMessage: USERS_MESSAGES.FOLLOWED_USER_ID_IS_REQUIRED
         },
         trim: true,
-        custom: {
-          options: async (value, { req }) => {
-            // check value có phải ObjectId hay không
-            if (!ObjectId.isValid(value)) {
-              throw new ErrorWithStatus({
-                message: USERS_MESSAGES.INVALID_FOLLOWED_USER_ID,
-                status: HTTP_STATUS.NOT_FOUND
-              })
-            }
-
-            // kiểm tra xem người dùng có tồn tại hay không
-            const followed_user = await databaseService.users.findOne({ _id: new ObjectId(value) })
-
-            if (followed_user === null) {
-              throw new ErrorWithStatus({
-                message: USERS_MESSAGES.USER_NOT_FOUND,
-                status: HTTP_STATUS.NOT_FOUND
-              })
-            }
-
-            // kiểm tra xem người dùng có tự follow chính mình hay không
-            if (followed_user._id.toString() === req.decoded_authorization.user_id) {
-              throw new ErrorWithStatus({
-                message: USERS_MESSAGES.CANNOT_FOLLOW_YOURSELF,
-                status: HTTP_STATUS.FORBIDDEN
-              })
-            }
-            return true
-          }
-        }
+        custom: userIdSchema
       }
     },
     ['body']
+  )
+)
+
+export const unfollowValidator = validate(
+  checkSchema(
+    {
+      user_id: userIdSchema
+    },
+    ['params']
   )
 )
