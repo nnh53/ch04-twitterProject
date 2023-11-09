@@ -5,19 +5,19 @@
 - ta sẽ làm route cập nhật thông tin cả nhân
 - đối với route này thì ta có thể chọn giữa method `put` và `patch`
 - khác nhau giữa `method` put và `patch`
-  ![Alt text](image-149.png)
+  ![Alt text](./attachments/image-149.png)
 - ở đây mình sẽ dùng `method patch`
 
 - vào `users.routes.ts` tạo route ``
 
   ```ts
   usersRouter.patch(
-    "/me",
+    '/me',
     accessTokenValidator,
     verifiedUserValidator,
     updateMeValidator,
     wrapAsync(updateMeController)
-  );
+  )
   ```
 
   - accessTokenValidator kiểm tra client đã đăng nhập chưa, vì đăng nhập r mới đc quyền update profile đồng thời tạo ra `decoded_authorization` và lưu vào req
@@ -28,14 +28,14 @@
     - vào `User.request.ts`
     ```ts
     export interface UpdateMeReqBody {
-      name?: string;
-      date_of_birth?: string; //vì ngta truyền lên string dạng ISO8601, k phải date
-      bio?: string;
-      location?: string;
-      website?: string;
-      username?: string;
-      avatar?: string;
-      cover_photo?: string;
+      name?: string
+      date_of_birth?: string //vì ngta truyền lên string dạng ISO8601, k phải date
+      bio?: string
+      location?: string
+      website?: string
+      username?: string
+      avatar?: string
+      cover_photo?: string
     }
     //vì đây là route patch nên ngta truyền thiếu 1 trong các prop trên cũng k sao
     ```
@@ -165,9 +165,9 @@
 
     ```ts
     export interface TokenPayload extends JwtPayload {
-      user_id: string;
-      token_type: TokenType;
-      verify: UserVerifyStatus;
+      user_id: string
+      token_type: TokenType
+      verify: UserVerifyStatus
     }
     ```
 
@@ -176,23 +176,19 @@
   ```ts
   //ở hàm này mình dùng middleware thông thường, vì mình k cần xử lý ở 'body' hay 'header'
   //mà chỉ cần xử lý decoded_authorization, lấy đc từ middleware accessTokenValidator trước đó
-  export const verifiedUserValidator = (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    const { verify } = req.decoded_authorization as TokenPayload;
+  export const verifiedUserValidator = (req: Request, res: Response, next: NextFunction) => {
+    const { verify } = req.decoded_authorization as TokenPayload
     //nếu chưa verify thì không update được
     if (verify !== UserVerifyStatus.Verified) {
       throw new ErrorWithStatus({
         message: USERS_MESSAGES.USER_NOT_VERIFIED,
-        status: HTTP_STATUS.FORBIDDEN, //403: không đủ quyền truy cập
-      });
+        status: HTTP_STATUS.FORBIDDEN //403: không đủ quyền truy cập
+      })
     }
     //trong messages.ts thêm USER_NOT_VERIFIED: 'User not verified'
     //trong httpStatus.ts thêm FORBIDDEN: 403
-    next();
-  };
+    next()
+  }
   ```
 
   - nếu hàm `verifiedUserValidator` là bất đồng bộ `async` thì mình phải dùng `next` như dưới đây thì lỗi mới về đc `error handler tổng`
@@ -201,45 +197,37 @@
 
   ```ts
   //có thể dùng async nhưng phải dùng next
-  export const verifiedUserValidator = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    const { verify } = req.decoded_authorization as TokenPayload;
+  export const verifiedUserValidator = async (req: Request, res: Response, next: NextFunction) => {
+    const { verify } = req.decoded_authorization as TokenPayload
     if (verify !== UserVerifyStatus.Verified) {
       //thay throw thành next
       return next(
         new ErrorWithStatus({
           message: USERS_MESSAGES.USER_NOT_VERIFIED,
-          status: HTTP_STATUS.FORBIDDEN,
+          status: HTTP_STATUS.FORBIDDEN
         })
-      );
+      )
     }
-    next();
-  };
+    next()
+  }
   ```
 
   - mà next thì async hay k đều đc nên code cuối cùng của mình sẽ bỏ `async`, `throw` và dùng `next`
 
   ```ts
   //bỏ async
-  export const verifiedUserValidator = (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    const { verify } = req.decoded_authorization as TokenPayload;
+  export const verifiedUserValidator = (req: Request, res: Response, next: NextFunction) => {
+    const { verify } = req.decoded_authorization as TokenPayload
     if (verify !== UserVerifyStatus.Verified) {
       return next(
         new ErrorWithStatus({
           message: USERS_MESSAGES.USER_NOT_VERIFIED,
-          status: HTTP_STATUS.FORBIDDEN,
+          status: HTTP_STATUS.FORBIDDEN
         })
-      );
+      )
     }
-    next();
-  };
+    next()
+  }
   ```
 
   - nếu cứng đầu thì ta dùng wraperAsync khi xài, nhưng nó dài và rườm rà , ta lại chưa cần async await nên thôi
@@ -277,10 +265,10 @@
     }
   }
     //tí xài cho property avatar và cover_photo
-  const imageSchema: ParamSchema = {
+  const ./attachments/imageSchema: ParamSchema = {
     optional: true,
     isString: {
-        errorMessage: USERS_MESSAGES.IMAGE_URL_MUST_BE_A_STRING ////messages.ts thêm IMAGE_URL_MUST_BE_A_STRING: 'Image url must be a string'
+        errorMessage: USERS_MESSAGES../attachments/image_URL_MUST_BE_A_STRING ////messages.ts thêm ./attachments/image_URL_MUST_BE_A_STRING: './attachments/image url must be a string'
     },
     trim: true,//nên đặt trim dưới này thay vì ở đầu
     isLength: {
@@ -288,7 +276,7 @@
         min: 1,
         max: 400
         },
-        errorMessage: USERS_MESSAGES.IMAGE_URL_LENGTH_MUST_BE_LESS_THAN_400 //messages.ts thêm IMAGE_URL_LENGTH_MUST_BE_LESS_THAN_400: 'Image url length must be less than 400'
+        errorMessage: USERS_MESSAGES../attachments/image_URL_LENGTH_MUST_BE_LESS_THAN_400 //messages.ts thêm ./attachments/image_URL_LENGTH_MUST_BE_LESS_THAN_400: './attachments/image url length must be less than 400'
     }
     }
 
@@ -376,8 +364,8 @@
                 errorMessage: USERS_MESSAGES.USERNAME_LENGTH_MUST_BE_LESS_THAN_50 //messages.ts thêm USERNAME_LENGTH_MUST_BE_LESS_THAN_50: 'Username length must be less than 50'
                 }
             },
-            avatar: imageSchema,
-            cover_photo: imageSchema
+            avatar: ./attachments/imageSchema,
+            cover_photo: ./attachments/imageSchema
             },
             ['body']
         )
@@ -394,19 +382,19 @@
     next: NextFunction
   ) => {
     //middleware accessTokenValidator đã chạy rồi, nên ta có thể lấy đc user_id từ decoded_authorization
-    const { user_id } = req.decoded_authorization as TokenPayload;
+    const { user_id } = req.decoded_authorization as TokenPayload
     //user_id để biết phải cập nhật ai
     //lấy thông tin mới từ req.body
-    const { body } = req;
+    const { body } = req
     //lấy các property mà client muốn cập nhật
     //ta sẽ viết hàm updateMe trong user.services
     //nhận vào user_id và body để cập nhật
-    const result = await usersService.updateMe(user_id, body);
+    const result = await usersService.updateMe(user_id, body)
     return res.json({
       message: USERS_MESSAGES.UPDATE_ME_SUCCESS, //meesage.ts thêm  UPDATE_ME_SUCCESS: 'Update me success'
-      result,
-    });
-  };
+      result
+    })
+  }
   ```
 
 - vào `users.services.ts` tạo thêm `updateMe`
@@ -459,37 +447,33 @@
 
 - test code như sau
   - đăng nhập 1 tài khoản: nếu chưa verify thì phải verify
-    ![Alt text](image-150.png)
+    ![Alt text](./attachments/image-150.png)
   - thử truyền vào body sai username
-    ![Alt text](image-151.png)
+    ![Alt text](./attachments/image-151.png)
   - truyền đúng đầy đủ thông tin
     - nếu k có projection
-      ![Alt text](image-152.png)
+      ![Alt text](./attachments/image-152.png)
     - nếu có projection
-      ![Alt text](image-154.png)
+      ![Alt text](./attachments/image-154.png)
   - kiểm tra xem mongo đã cập nhật chưa
-    ![Alt text](image-153.png)
+    ![Alt text](./attachments/image-153.png)
 
 ## bàn về khuyết điểm của verifiedUserValidator
 
 - khi xử lý , ta k cần phải lên server để kiểm tra account có verify hay chưa, mà ta dùng access_token decode ra và xem verify
   ```ts
-  export const verifiedUserValidator = (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    const { verify } = req.decoded_authorization as TokenPayload;
+  export const verifiedUserValidator = (req: Request, res: Response, next: NextFunction) => {
+    const { verify } = req.decoded_authorization as TokenPayload
     if (verify !== UserVerifyStatus.Verified) {
       return next(
         new ErrorWithStatus({
           message: USERS_MESSAGES.USER_NOT_VERIFIED,
-          status: HTTP_STATUS.FORBIDDEN,
+          status: HTTP_STATUS.FORBIDDEN
         })
-      );
+      )
     }
-    next();
-  };
+    next()
+  }
   ```
 - việc này nhanh, tiện nhưng cũng chứa rất nhiều rũi ro
   - 1. người dùng đăng nhập bằng máy tính và họ muốn verify tài khoản
@@ -505,7 +489,7 @@
 
 - ở phần trên chúng ta có mỗi lỗi rất thú vị như sau, đó là nếu như người dùng
   truyền dư property, hay cố tình ghi đè, thì ta sẽ bị tấn công dữ liệu.
-  ![Alt text](image-155.png)
+  ![Alt text](./attachments/image-155.png)
 - đó là vì ta chưa xử lý body mà client truyền lên, để rồi client thích truyền gì thì truyền
 - giải pháp: ta sẽ dùng function `.pick` của lodash, nó sẽ lấy ra những prop
   nào mà ta muốn thôi
@@ -540,40 +524,40 @@
   - vào folder `middleware` tạo `common.middlewares.ts` (file lưu những middleware dùng đc cho nhiều nơi)
 
   ```ts
-  import { Response, Request, NextFunction } from "express";
-  import { pick } from "lodash";
+  import { Response, Request, NextFunction } from 'express'
+  import { pick } from 'lodash'
   //ta đang dùng generic để khi dùng hàm filterMiddleware nó sẽ nhắc ta nên bỏ property nào vào mảng
   //FilterKeys là mảng các key của object T nào đó
-  type FilterKeys<T> = Array<keyof T>;
+  type FilterKeys<T> = Array<keyof T>
 
   export const filterMiddleware =
     <T>(filterKey: FilterKeys<T>) =>
     (req: Request, res: Response, next: NextFunction) => {
-      req.body = pick(req.body, filterKey);
-      next();
-    };
+      req.body = pick(req.body, filterKey)
+      next()
+    }
   ```
 
   - vào route patch `/me` thêm `filterMiddleware` là xong
 
   ```ts
   usersRouter.patch(
-    "/me",
+    '/me',
     accessTokenValidator,
     verifiedUserValidator,
     filterMiddleware<UpdateMeReqBody>([
-      "name",
-      "date_of_birth",
-      "bio",
-      "location",
-      "website",
-      "avatar",
-      "username",
-      "cover_photo",
+      'name',
+      'date_of_birth',
+      'bio',
+      'location',
+      'website',
+      'avatar',
+      'username',
+      'cover_photo'
     ]),
     updateMeValidator,
     wrapAsync(updateMeController)
-  );
+  )
   //truyền khác key là nó báo lỗi ngay
   ```
 
@@ -604,25 +588,21 @@
   method: get
   không cần header vì, chưa đăng nhập cũng có thể xem
   */
-  usersRouter.get("/:username", wrapAsync(getProfileController));
+  usersRouter.get('/:username', wrapAsync(getProfileController))
   //chưa có controller getProfileController, nên bây giờ ta làm
   ```
 - ở đây ta dùng query string param nên lúc cần lấy giá trị truyền lên ta sẽ `req.param` là đc
 - vào `users.controller.ts` tạo controller `getProfileController`
 
   ```ts
-  export const getProfileController = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    const { username } = req.params; //lấy username từ query params
-    const result = await usersService.getProfile(username);
+  export const getProfileController = async (req: Request, res: Response, next: NextFunction) => {
+    const { username } = req.params //lấy username từ query params
+    const result = await usersService.getProfile(username)
     return res.json({
       message: USERS_MESSAGES.GET_PROFILE_SUCCESS, //message.ts thêm  GET_PROFILE_SUCCESS: 'Get profile success',
-      result,
-    });
-  };
+      result
+    })
+  }
   //usersService.getProfile(username) nhận vào username tìm và return ra ngoài, hàm này chưa viết
   //giờ ta sẽ viết
   ```
@@ -658,7 +638,7 @@
 
 ```ts
 export interface GetProfileReqParams {
-  username: string;
+  username: string
 }
 ```
 
@@ -688,12 +668,12 @@ export const getProfileController = async (req: Request<GetProfileReqParams>, re
 
 - test code:
 - tạo tài khoản với email là: lehodiep.2032@gmail.com
-  ![Alt text](image-156.png)
-  ![Alt text](image-157.png)
+  ![Alt text](./attachments/image-156.png)
+  ![Alt text](./attachments/image-157.png)
 - tìm trên mongo để xem username: user65125a462ef68ee01b175a58
-  ![Alt text](image-158.png)
+  ![Alt text](./attachments/image-158.png)
 - tạo request mới
-  ![Alt text](image-159.png)
+  ![Alt text](./attachments/image-159.png)
 
 # Follow User
 
@@ -701,10 +681,10 @@ export const getProfileController = async (req: Request<GetProfileReqParams>, re
 
   ```ts
   interface Follower {
-    _id: ObjectId;
-    user_id: ObjectId;
-    followed_user_id: ObjectId;
-    created_at: Date;
+    _id: ObjectId
+    user_id: ObjectId
+    followed_user_id: ObjectId
+    created_at: Date
   }
   ```
 
@@ -718,14 +698,8 @@ export const getProfileController = async (req: Request<GetProfileReqParams>, re
   headers: {Authorization: Bearer <access_token>}
   body: {followed_user_id: string}
   */
-  usersRouter.get(
-    "/follow",
-    accessTokenValidator,
-    verifiedUserValidator,
-    followValidator,
-    wrapAsync(followController)
-  );
-  export default usersRouter;
+  usersRouter.get('/follow', accessTokenValidator, verifiedUserValidator, followValidator, wrapAsync(followController))
+  export default usersRouter
   //accessTokenValidator dùng dể kiểm tra xem ngta có đăng nhập hay chưa, và có đc user_id của người dùng từ req.decoded_authorization
   //verifiedUserValidator dùng để kiễm tra xem ngta đã verify email hay chưa, rồi thì mới cho follow người khác
   //trong req.body có followed_user_id  là mã của người mà ngta muốn follow
@@ -738,7 +712,7 @@ export const getProfileController = async (req: Request<GetProfileReqParams>, re
 
   ```ts
   export interface FollowReqBody {
-    followed_user_id: string;
+    followed_user_id: string
   }
   ```
 
@@ -747,30 +721,25 @@ export const getProfileController = async (req: Request<GetProfileReqParams>, re
   - tạo schema cho collection `followers`: vào folder `models > schemas` tạo file `Followers.schema.ts`
 
     ```ts
-    import { ObjectId } from "mongodb";
+    import { ObjectId } from 'mongodb'
 
     interface FollowersType {
-      _id?: ObjectId;
-      user_id: ObjectId;
-      followed_user_id: ObjectId;
-      created_at?: Date;
+      _id?: ObjectId
+      user_id: ObjectId
+      followed_user_id: ObjectId
+      created_at?: Date
     }
 
     export class Follower {
-      _id?: ObjectId;
-      user_id: ObjectId;
-      followed_user_id: ObjectId;
-      created_at?: Date;
-      constructor({
-        _id,
-        user_id,
-        followed_user_id,
-        created_at,
-      }: FollowersType) {
-        this._id = _id;
-        this.user_id = user_id;
-        this.followed_user_id = followed_user_id;
-        this.created_at = created_at || new Date();
+      _id?: ObjectId
+      user_id: ObjectId
+      followed_user_id: ObjectId
+      created_at?: Date
+      constructor({ _id, user_id, followed_user_id, created_at }: FollowersType) {
+        this._id = _id
+        this.user_id = user_id
+        this.followed_user_id = followed_user_id
+        this.created_at = created_at || new Date()
       }
     }
     ```
@@ -797,28 +766,28 @@ export const getProfileController = async (req: Request<GetProfileReqParams>, re
               if (!ObjectId.isValid(value)) {
                 throw new ErrorWithStatus({
                   message: USERS_MESSAGES.INVALID_FOLLOWED_USER_ID, //trong message.ts thêm INVALID_FOLLOWED_USER_ID: 'Invalid followed user id'
-                  status: HTTP_STATUS.NOT_FOUND,
-                });
+                  status: HTTP_STATUS.NOT_FOUND
+                })
               }
               //vào database tìm user đó xem có không ?
               const followed_user = await databaseService.users.findOne({
-                _id: new ObjectId(value),
-              });
+                _id: new ObjectId(value)
+              })
               if (followed_user === null) {
                 throw new ErrorWithStatus({
                   message: USERS_MESSAGES.FOLLOWED_USER_NOT_FOUND, //trong message.ts thêm FOLLOWED_USER_NOT_FOUND: 'Followed user not found'
-                  status: HTTP_STATUS.NOT_FOUND,
-                });
+                  status: HTTP_STATUS.NOT_FOUND
+                })
               }
               //nếu vướt qua hết if thì return true
-              return true;
-            },
-          },
-        },
+              return true
+            }
+          }
+        }
       },
-      ["body"]
+      ['body']
     )
-  );
+  )
   ```
 
 - trong `users.controllers.ts` tạo `followController`
@@ -829,11 +798,11 @@ export const getProfileController = async (req: Request<GetProfileReqParams>, re
     res: Response,
     next: NextFunction
   ) => {
-    const { user_id } = req.decoded_authorization as TokenPayload; //lấy user_id từ decoded_authorization của access_token
-    const { followed_user_id } = req.body; //lấy followed_user_id từ req.body
-    const result = await usersService.follow(user_id, followed_user_id); //chưa có method này
-    return res.json(result);
-  };
+    const { user_id } = req.decoded_authorization as TokenPayload //lấy user_id từ decoded_authorization của access_token
+    const { followed_user_id } = req.body //lấy followed_user_id từ req.body
+    const result = await usersService.follow(user_id, followed_user_id) //chưa có method này
+    return res.json(result)
+  }
   ```
 
 - vào `users.services.ts` tạo method `follow`
@@ -867,31 +836,31 @@ export const getProfileController = async (req: Request<GetProfileReqParams>, re
 # test code
 
 - tạo tài khoản `lehodiep.2040@gmail.com`
-  ![Alt text](image-160.png)
+  ![Alt text](./attachments/image-160.png)
 
   - verify tài khoản này
   - sau đó kiểm tra trong mongo cái username của account đó
-    ![Alt text](image-161.png)
+    ![Alt text](./attachments/image-161.png)
     `user6514f5ba0b5a27781349fcd6`
 
 - tạo tài khoản `lehodiep.2044@gmail.com`
-  ![Alt text](image-162.png)
+  ![Alt text](./attachments/image-162.png)
 
   - verify tài khoản này
   - sau đó kiểm tra trong mongo cái username của account đó
-    ![Alt text](image-163.png)
+    ![Alt text](./attachments/image-163.png)
   - `user6514f6df0b5a27781349fcd8`
 
 - đăng nhập `lehodiep.2040@gmail.com`
-  ![Alt text](image-164.png)
+  ![Alt text](./attachments/image-164.png)
 
 - tạo request mới để follow account có followed_user_id: `6514f6df0b5a27781349fcd8`
-  ![Alt text](image-165.png)
+  ![Alt text](./attachments/image-165.png)
   thứ bấm follow nhiều lần 1 người xem có lỗi không ?
-  ![Alt text](image-167.png)
+  ![Alt text](./attachments/image-167.png)
 
   - thử follow sai người
-    ![Alt text](image-166.png)
+    ![Alt text](./attachments/image-166.png)
 
 - kiểm tra lại mongoDB
   **đã kiểm tra document đến đây**
@@ -911,12 +880,12 @@ khi ai đó muốn unfollow thì ta sẽ xóa đi document tương ứng tronng 
   g}
     */
 usersRouter.delete(
-  "/follow/:user_id",
+  '/follow/:user_id',
   accessTokenValidator,
   verifiedUserValidator,
   unfollowValidator,
   wrapAsync(unfollowController)
-);
+)
 
 //unfollowValidator: kiểm tra user_id truyền qua params có hợp lệ hay k?
 ```
@@ -935,65 +904,61 @@ usersRouter.delete(
         if (!ObjectId.isValid(value)) {
           throw new ErrorWithStatus({
             message: USERS_MESSAGES.INVALID_user_id, //trong message.ts thêm INVALID_user_id: 'Invalid user id'followed user id'
-            status: HTTP_STATUS.NOT_FOUND,
-          });
+            status: HTTP_STATUS.NOT_FOUND
+          })
         }
         //đổi tên biến thành user luôn cho phù hợp
         const user = await databaseService.users.findOne({
-          _id: new ObjectId(value),
-        });
+          _id: new ObjectId(value)
+        })
         if (user === null) {
           throw new ErrorWithStatus({
             message: USERS_MESSAGES.USER_NOT_FOUND, //fix lại cho nó thông báo chung
-            status: HTTP_STATUS.NOT_FOUND,
-          });
+            status: HTTP_STATUS.NOT_FOUND
+          })
         }
         //nếu vướt qua hết if thì return true
-        return true;
-      },
-    },
-  };
+        return true
+      }
+    }
+  }
   //fix lại followValidator
   export const followValidator = validate(
     checkSchema(
       {
-        followed_user_id: userIdSchema,
+        followed_user_id: userIdSchema
       },
-      ["body"]
+      ['body']
     )
-  );
+  )
   //và thêm unfollowValidator
   export const unfollowValidator = validate(
     checkSchema(
       {
-        user_id: userIdSchema,
+        user_id: userIdSchema
       },
-      ["params"]
+      ['params']
     )
-  );
+  )
   ```
 
 - định nghĩa params của request này trong file `User.requests.ts`
 
   ```ts
   export interface UnfollowReqParams {
-    user_id: string;
+    user_id: string
   }
   ```
 
 - vào `users.controller.ts` làm controller `unfollowController`
 
   ```ts
-  export const unfollowController = async (
-    req: Request<UnfollowReqParams>,
-    res: Response,
-    next: NextFunction
-  ) => {
-    const { user_id } = req.decoded_authorization as TokenPayload; //lấy user_id từ decoded_authorization của access_token
-    const { user_id: followed_user_id } = req.params; //lấy user_id từ req.params là user_id của người mà ngta muốn unfollow
-    const result = await usersService.unfollow(user_id, followed_user_id); //unfollow chưa làm
-    return res.json(result);
-  };
+  export const unfollowController = async (req: Request<UnfollowReqParams>, res: Response, next: NextFunction) => {
+    const { user_id } = req.decoded_authorization as TokenPayload //lấy user_id từ decoded_authorization của access_token
+    const { user_id: followed_user_id } = req.params //lấy user_id từ req.params là user_id của người mà ngta muốn unfollow
+    const result = await usersService.unfollow(user_id, followed_user_id) //unfollow chưa làm
+    return res.json(result)
+  }
   ```
 
 - vào `users.services.ts` làm method `unfollow`
@@ -1027,7 +992,7 @@ usersRouter.delete(
   ```
 
 - đến đây ta sẽ thấy route của mình bị lỗi, đây là 1 lỗi khá đặc biệt, vì trước đây ở getProfile ta cũng đã dùng params nhưng k sao
-  ![Alt text](image-168.png)
+  ![Alt text](./attachments/image-168.png)
 
   - đó là vì mặc định param là `ParamsDictionary`, nhưng ta đang dùng 1 dạng params mới là `UnfollowReqParams`
   - vấn đề là:
@@ -1041,15 +1006,15 @@ usersRouter.delete(
 
     ```ts
     //thêm import
-    import { ParamsDictionary } from "express-serve-static-core";
+    import { ParamsDictionary } from 'express-serve-static-core'
     //cho UnfollowReqParams kế thừa ParamsDictionary
     export interface UnfollowReqParams extends ParamsDictionary {
-      user_id: string;
+      user_id: string
     }
 
     //ta làm luôn cho GetProfileReqParams
     export interface GetProfileReqParams extends ParamsDictionary {
-      username: string;
+      username: string
     }
     ```
 
@@ -1057,11 +1022,11 @@ usersRouter.delete(
 
 - test code:
   - tạo request mới và unfollow ông vừa follow
-    ![Alt text](image-169.png)
+    ![Alt text](./attachments/image-169.png)
   - xem thử trong mongodb ta đã xóa document của followers chưa
-    ![Alt text](image-170.png)
+    ![Alt text](./attachments/image-170.png)
   - bấm cái nữa
-    ![Alt text](image-171.png)
+    ![Alt text](./attachments/image-171.png)
 
 # fix bug unique username
 
@@ -1075,7 +1040,7 @@ nếu vậy thì thi `getProfile` bằng `username` có thể dẫn đến lấy
 
 - trong folder `constants` tạo file `regex.ts`
   ```ts
-  export const REGEX_USERNAME = /^(?![0-9]+$)[A-Za-z0-9_]{4,15}$/;
+  export const REGEX_USERNAME = /^(?![0-9]+$)[A-Za-z0-9_]{4,15}$/
   ```
 - vào `users.middlewares.ts` và cập nhật lại `updateMeValidator> username`
 
@@ -1121,12 +1086,12 @@ nếu vậy thì thi `getProfile` bằng `username` có thể dẫn đến lấy
 g}
   */
 usersRouter.put(
-  "/change-password",
+  '/change-password',
   accessTokenValidator,
   verifiedUserValidator,
   changePasswordValidator,
   wrapAsync(changePasswordController)
-);
+)
 //changePasswordValidator kiểm tra các giá trị truyền lên trên body cớ valid k ?
 ```
 
@@ -1134,9 +1099,9 @@ usersRouter.put(
 
 ```ts
 export interface ChangePasswordReqBody {
-  old_password: string;
-  password: string;
-  confirm_password: string;
+  old_password: string
+  password: string
+  confirm_password: string
 }
 ```
 
@@ -1152,35 +1117,35 @@ export const changePasswordValidator = validate(
           options: async (value, { req }) => {
             //sau khi qua accestokenValidator thì ta đã có req.decoded_authorization chứa user_id
             //lấy user_id đó để tìm user trong
-            const { user_id } = req.decoded_authorization as TokenPayload;
+            const { user_id } = req.decoded_authorization as TokenPayload
             const user = await databaseService.users.findOne({
-              _id: new ObjectId(user_id),
-            });
+              _id: new ObjectId(user_id)
+            })
             //nếu không có user thì throw error
             if (!user) {
               throw new ErrorWithStatus({
                 message: USERS_MESSAGES.USER_NOT_FOUND,
-                status: HTTP_STATUS.UNAUTHORIZED, //401
-              });
+                status: HTTP_STATUS.UNAUTHORIZED //401
+              })
             }
             //nếu có user thì kiểm tra xem password có đúng không
-            const { password } = user;
-            const isMatch = password === hashPassword(value);
+            const { password } = user
+            const isMatch = password === hashPassword(value)
             if (!isMatch) {
               throw new ErrorWithStatus({
                 message: USERS_MESSAGES.OLD_PASSWORD_NOT_MATCH, //trong messages.ts thêm OLD_PASSWORD_NOT_MATCH: 'Old password not match'
-                status: HTTP_STATUS.UNAUTHORIZED, //401
-              });
+                status: HTTP_STATUS.UNAUTHORIZED //401
+              })
             }
-          },
-        },
+          }
+        }
       },
       password: passwordSchema,
-      confirm_password: confirmPasswordSchema,
+      confirm_password: confirmPasswordSchema
     },
-    ["body"]
+    ['body']
   )
-);
+)
 ```
 
 - tạo controller
@@ -1191,11 +1156,11 @@ export const changePasswordController = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { user_id } = req.decoded_authorization as TokenPayload; //lấy user_id từ decoded_authorization của access_token
-  const { password } = req.body; //lấy old_password và password từ req.body
-  const result = await usersService.changePassword(user_id, password); //chưa code changePassword
-  return res.json(result);
-};
+  const { user_id } = req.decoded_authorization as TokenPayload //lấy user_id từ decoded_authorization của access_token
+  const { password } = req.body //lấy old_password và password từ req.body
+  const result = await usersService.changePassword(user_id, password) //chưa code changePassword
+  return res.json(result)
+}
 ```
 
 - `changePassword`
@@ -1235,11 +1200,7 @@ export const changePasswordController = async (
     Body: {refresh_token: string}
   g}
     */
-  usersRouter.post(
-    "/refresh-token",
-    refreshTokenValidator,
-    wrapAsync(refreshController)
-  );
+  usersRouter.post('/refresh-token', refreshTokenValidator, wrapAsync(refreshController))
   //khỏi kiểm tra accesstoken, tại nó hết hạn rồi mà
   //refreshController chưa làm
   ```
@@ -1248,7 +1209,7 @@ export const changePasswordController = async (
 
 ```ts
 export interface RefreshTokenReqBody {
-  refresh_token: string;
+  refresh_token: string
 }
 ```
 
@@ -1263,18 +1224,14 @@ export const refreshTokenController = async (
   // khi qua middleware refreshTokenValidator thì ta đã có decoded_refresh_token
   //chứa user_id và token_type
   //ta sẽ lấy user_id để tạo ra access_token và refresh_token mới
-  const { user_id, verify } = req.decoded_refresh_token as TokenPayload; //lấy refresh_token từ req.body
-  const { refresh_token } = req.body;
-  const result = await usersService.refreshToken(
-    user_id,
-    verify,
-    refresh_token
-  ); //refreshToken chưa code
+  const { user_id, verify } = req.decoded_refresh_token as TokenPayload //lấy refresh_token từ req.body
+  const { refresh_token } = req.body
+  const result = await usersService.refreshToken(user_id, verify, refresh_token) //refreshToken chưa code
   return res.json({
     message: USERS_MESSAGES.REFRESH_TOKEN_SUCCESS, //message.ts thêm  REFRESH_TOKEN_SUCCESS: 'Refresh token success',
-    result,
-  });
-};
+    result
+  })
+}
 ```
 
 - vào `user.services.ts` code `refreshToken`
@@ -1306,15 +1263,15 @@ export const refreshTokenController = async (
 - test code
 
   - login để thu về refresh_token
-    ![Alt text](image-235.png)
+    ![Alt text](./attachments/image-235.png)
   - kiểm tra refresh_token vừa thu được có trong collection refresh_tokens không ?
-    ![Alt text](image-236.png)
+    ![Alt text](./attachments/image-236.png)
   - giờ tiến hánh refresh để xem user_id đó có đổi refresh-token mới không?
-    ![Alt text](image-237.png)
+    ![Alt text](./attachments/image-237.png)
   - doc đã mất
-    ![Alt text](image-238.png)
+    ![Alt text](./attachments/image-238.png)
   - tìm lại bằng refresh-token mới thu được
-    ![Alt text](image-239.png)
+    ![Alt text](./attachments/image-239.png)
     nếu đúng user_id trước đó là thành công
 
 - _ta sẽ làm sau phần : đồng bộ thời gian hết hạn của refresh_token cũ và refresh_token mới với nhau_
