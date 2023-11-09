@@ -28,7 +28,6 @@ export const validate = (validation: RunnableValidationChains<ValidationChain>):
 
     // map lại error của tất cả các chain lại (KỂ CẢ KHÔNG PHẢI TỪ validation chain)
     const allErrorMappedObject = allErrors.mapped()
-    console.log(allErrorMappedObject)
 
     const entityError = new EntityError({ errors: {} })
 
