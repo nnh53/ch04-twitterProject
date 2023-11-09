@@ -79,7 +79,6 @@ class UsersService {
       verify: UserVerifyStatus.Unverified //0
     })
 
-    // prettier-ignore
     const result = await databaseService.users.insertOne(
       new User({
         ...payLoad,
@@ -90,7 +89,6 @@ class UsersService {
         password: hashPassword(payLoad.password)
       })
     )
-
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken({
       user_id: user_id.toString(),
       verify: UserVerifyStatus.Unverified
@@ -332,6 +330,25 @@ class UsersService {
       followed_user_id: new ObjectId(followed_user_id)
     })
     return { message: USERS_MESSAGES.UNFOLLOW_SUCCESS }
+  }
+
+  async changePassword(user_id: string, password: string) {
+    await databaseService.users.updateOne(
+      {
+        _id: new ObjectId(user_id)
+      },
+      [
+        {
+          $set: {
+            password: hashPassword(password),
+            updated_at: '$$NOW'
+          }
+        }
+      ]
+    )
+    return {
+      message: USERS_MESSAGES.CHANGE_PASSWORD_SUCCESS
+    }
   }
 }
 

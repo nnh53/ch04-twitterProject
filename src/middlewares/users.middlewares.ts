@@ -14,6 +14,7 @@ import _, { capitalize } from 'lodash'
 import { ObjectId } from 'mongodb'
 import { TokenPayload } from '~/models/requests/Users.request'
 import { TokenType, UserVerifyStatus } from '~/constants/enums'
+import { REGEX_USERNAME } from '~/constants/regex'
 
 const imageSchema: ParamSchema = {
   optional: true,
@@ -553,12 +554,19 @@ export const updateMeValidator = validate(
           errorMessage: USERS_MESSAGES.USERNAME_MUST_BE_A_STRING ////messages.ts thêm USERNAME_MUST_BE_A_STRING: 'Username must be a string'
         },
         trim: true,
-        isLength: {
-          options: {
-            min: 1,
-            max: 50
-          },
-          errorMessage: USERS_MESSAGES.USERNAME_LENGTH_MUST_BE_LESS_THAN_50 //messages.ts thêm USERNAME_LENGTH_MUST_BE_LESS_THAN_50: 'Username length must be less than 50'
+        custom: {
+          options: async (value, { req }) => {
+            if (REGEX_USERNAME.test(value) === false) {
+              throw new Error(USERS_MESSAGES.USERNAME_IS_INVALID)
+            }
+            // tìm user bằng cái username người dùng muốn cập nhật
+            const user = await databaseService.users.findOne({ username: value })
+
+            if (user) {
+              throw new Error(USERS_MESSAGES.USERNAME_ALREADY_EXISTS)
+            }
+            return true
+          }
         }
       },
       avatar: imageSchema,
@@ -589,5 +597,45 @@ export const unfollowValidator = validate(
       user_id: userIdSchema
     },
     ['params']
+  )
+)
+
+export const changePasswordValidator = validate(
+  checkSchema(
+    {
+      old_password: {
+        ...passwordSchema,
+        custom: {
+          // Ở ĐÂY OPTIONS LÀ 1 HÀM ASYNC CALLBACK NÊN KHI ĐC GỌI LẠI THÌ value đại diện cho old_password
+          options: async (value, { req }) => {
+            const { user_id } = req.decoded_authorization as TokenPayload
+
+            // tìm user bằng user_id và password
+            const user = await databaseService.users.findOne({
+              _id: new ObjectId(user_id)
+            })
+
+            if (user === null) {
+              throw new ErrorWithStatus({
+                message: USERS_MESSAGES.USER_NOT_FOUND,
+                status: HTTP_STATUS.NOT_FOUND
+              })
+            }
+            // nếu user tồn tại thì kiểm tra old_password có đúng với password trong db hay không
+            const { password } = user
+            if (password !== hashPassword(value)) {
+              throw new ErrorWithStatus({
+                message: USERS_MESSAGES.OLD_PASSWORD_IS_INCORRECT,
+                status: HTTP_STATUS.UNAUTHORIZED
+              })
+            }
+            return true
+          }
+        }
+      },
+      password: passwordSchema,
+      confirm_password: confirmPasswordSchema
+    },
+    ['body']
   )
 )
