@@ -9,8 +9,6 @@ type ErrorType = Record<
   }
 >
 
-//ở đây thường mình sẽ extend Error để nhận đc báo lỗi ở dòng nào
-
 export class ErrorWithStatus {
   message: string
   status: number

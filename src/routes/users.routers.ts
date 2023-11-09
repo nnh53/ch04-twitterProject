@@ -1,52 +1,36 @@
 import { Router } from 'express'
 import {
   emailVerifyController,
+  followController,
   forgotPasswordController,
   getMeController,
+  getProfileController,
   loginController,
   logoutController,
   resendEmailVerifyController,
   resetPasswordController,
+  updateMeController,
   verifyForgotPasswordController
 } from '~/controllers/users.controllers'
 import {
   accessTokenValidator,
   emailVerifyTokenValidator,
+  followValidator,
   forgotPasswordValidator,
   loginValidator,
   refreshTokenValidator,
   registerValidator,
   resetPasswordValidator,
+  updateMeValidator,
+  verifiedUserValidator,
   verifyForgotPasswordTokenValidator
 } from '~/middlewares/users.middlewares'
 import { registerController } from '~/controllers/users.controllers'
 import { wrapAsync } from '~/utils/handlers'
-import { verify } from 'crypto'
+import { filterMiddleware } from '~/middlewares/common.middlewares'
+import { UpdateMeReqBody } from '~/models/requests/Users.request'
 
 const usersRouter = Router()
-
-// usersRouter.use(
-//   (req, res, next) => {
-//     console.log('Time', Date.now())
-//     // return res.status(400).send('đồ ngu')
-//     next()
-//   }
-//   // (req, res, next) => {
-//   //   console.log('Time', Date.now())
-//   //   next()
-//   // }
-// )
-
-/*
-des: đăng nhập 
-path: /users/login
-method: POST
-body: { 
-  email, 
-  password
-}
-*/
-usersRouter.get('/login', loginValidator, wrapAsync(loginController))
 
 /*
 des: đăng ký
@@ -62,6 +46,26 @@ body: {
 */
 usersRouter.post('/register', registerValidator, wrapAsync(registerController)) //đúng ra là phải thêm có validator
 
+/*
+des: đăng nhập 
+path: /users/login
+method: POST
+body: { 
+  email, 
+  password
+}
+*/
+usersRouter.post('/login', loginValidator, wrapAsync(loginController))
+
+/*
+des: đăng xuất
+path: /users/logout
+method: POST
+header: {Authorization: Bearer <access_token>}
+body: {
+  refresh_token: string
+}
+*/
 usersRouter.post('/logout', accessTokenValidator, refreshTokenValidator, wrapAsync(logoutController))
 
 /*
@@ -121,7 +125,7 @@ usersRouter.post(
 des: reset password
 path: '/reset-password'
 method: POST
-Header: không cần, vì  ngta quên mật khẩu rồi, thì sao mà đăng nhập để có auth đc
+header: không cần, vì  ngta quên mật khẩu rồi, thì sao mà đăng nhập để có auth đc
 body: {forgot_password_token: string, password: string, confirm_password: string}
 */
 usersRouter.post(
@@ -132,12 +136,58 @@ usersRouter.post(
 )
 
 /*
-des: get profile của user
+des: get profile của mình
 path: '/me'
 method: get
-Header: {Authorization: Bearer <access_token>}
+header: {Authorization: Bearer <access_token>}
 body: {}
 */
 usersRouter.get('/me', accessTokenValidator, wrapAsync(getMeController))
+
+/*
+des: update profile của mình
+path: '/me'
+method: path
+header: {Authorization: Bearer <access_token>}
+body: {}
+*/
+usersRouter.patch(
+  '/me',
+  accessTokenValidator,
+  verifiedUserValidator,
+  filterMiddleware<UpdateMeReqBody>([
+    'name',
+    'date_of_birth',
+    'bio',
+    'location',
+    'website',
+    'avatar',
+    'username',
+    'cover_photo'
+  ]),
+  updateMeValidator,
+  wrapAsync(updateMeController)
+)
+
+/*
+des: get profile của người khác
+path: '/:username'
+method: get
+header: {}
+body: {}
+*/
+usersRouter.get('/:username', wrapAsync(getProfileController))
+
+/*
+des: follow người khác
+path: '/follow'
+method: post
+header: {Authorization: Bearer <access_token>}
+body: {followed_user_id: string}
+*/
+usersRouter.post('/follow/', accessTokenValidator, verifiedUserValidator, followValidator, wrapAsync(followController))
+// verifiedUserValidator: người dùng phải xác thực email rồi mới đc follow người khác
+// followValidator: người dùng không thể follow chính mình,kiểm tra có đúng định dạng ObjectId, account có tồn tại hay không
+// followController: kiểm tra xem đã follow chưa, tạo document vào collection followers
 
 export default usersRouter

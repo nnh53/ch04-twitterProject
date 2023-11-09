@@ -1,4 +1,7 @@
+import { getProfileController } from './../../controllers/users.controllers'
+import { verify } from 'crypto'
 import { JwtPayload } from 'jsonwebtoken'
+import { UserVerifyStatus } from '~/constants/enums'
 
 export interface RegisterReqBody {
   name: string
@@ -24,10 +27,31 @@ export interface VerifyEmailReqBody {
 export interface TokenPayload extends JwtPayload {
   user_id: string
   refresh_token: string
+  verify: UserVerifyStatus
 }
 
 export interface ResetPasswordBody {
   password: string
   confirm_password: string
   forgot_password_token: string
+}
+
+export interface UpdateMeReqBody {
+  name?: string
+  date_of_birth?: string //vì ngta truyền lên string dạng ISO8601, k phải date
+  bio?: string
+  location?: string
+  website?: string
+  username?: string
+  avatar?: string
+  cover_photo?: string
+}
+//vì đây là route patch nên ngta truyền thiếu 1 trong các prop trên cũng k sao
+
+export interface getProfileReqParams {
+  username: string
+}
+
+export interface FollowReqBody {
+  followed_user_id: string
 }

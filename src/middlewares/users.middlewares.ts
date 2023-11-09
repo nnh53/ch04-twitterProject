@@ -1,9 +1,4 @@
-// giả sử anh đag làm route login
-// thì người dùng sẽ truyền email và password
-// tạo 1 req có body là email và password
-// - làm 1 middleware kiểm tra xem email và password có đc truyền lên hay ko
-
-//************  Request / Response : CHÚ Ý LÀ XÀI CỦA EXPRESS ****************** */
+//************  Request / Response : CHÚ Ý LÀ XÀI CỦA EXPRESS *******************/
 import { NextFunction, Request, Response } from 'express'
 import { USERS_MESSAGES } from '~/constants/message'
 import { ParamSchema, checkSchema } from 'express-validator'
@@ -17,6 +12,23 @@ import { JsonWebTokenError } from 'jsonwebtoken'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { capitalize } from 'lodash'
 import { ObjectId } from 'mongodb'
+import { TokenPayload } from '~/models/requests/Users.request'
+import { TokenType, UserVerifyStatus } from '~/constants/enums'
+
+const imageSchema: ParamSchema = {
+  optional: true,
+  isString: {
+    errorMessage: USERS_MESSAGES.IMAGE_URL_MUST_BE_A_STRING
+  },
+  trim: true,
+  isLength: {
+    options: {
+      min: 1,
+      max: 400
+    },
+    errorMessage: USERS_MESSAGES.IMAGE_URL_LENGTH_MUST_BE_FROM_1_TO_400
+  }
+}
 
 const passwordSchema: ParamSchema = {
   notEmpty: {
@@ -80,6 +92,33 @@ const confirmPasswordSchema: ParamSchema = {
   }
 }
 
+const nameSchema: ParamSchema = {
+  notEmpty: {
+    errorMessage: USERS_MESSAGES.NAME_IS_REQUIRED
+  },
+  isString: {
+    errorMessage: USERS_MESSAGES.NAME_MUST_BE_A_STRING
+  },
+  trim: true,
+  isLength: {
+    options: {
+      min: 1,
+      max: 100
+    },
+    errorMessage: USERS_MESSAGES.NAME_LENGTH_MUST_BE_FROM_1_TO_100
+  }
+}
+
+const dateOfBirthSchema: ParamSchema = {
+  isISO8601: {
+    options: {
+      strict: true,
+      strictSeparator: true
+    }
+  },
+  errorMessage: USERS_MESSAGES.DATE_OF_BIRTH_BE_ISO8601
+}
+
 export const loginValidator = validate(
   checkSchema(
     {
@@ -140,22 +179,7 @@ export const loginValidator = validate(
 export const registerValidator = validate(
   checkSchema(
     {
-      name: {
-        notEmpty: {
-          errorMessage: USERS_MESSAGES.NAME_IS_REQUIRED
-        },
-        isString: {
-          errorMessage: USERS_MESSAGES.NAME_MUST_BE_A_STRING
-        },
-        trim: true,
-        isLength: {
-          options: {
-            min: 1,
-            max: 100
-          },
-          errorMessage: USERS_MESSAGES.NAME_LENGTH_MUST_BE_FROM_1_TO_100
-        }
-      },
+      name: nameSchema,
       email: {
         notEmpty: {
           errorMessage: USERS_MESSAGES.EMAIL_IS_REQUIRED
@@ -176,19 +200,20 @@ export const registerValidator = validate(
       },
       password: passwordSchema,
       confirm_password: confirmPasswordSchema,
-      date_of_birth: {
-        isISO8601: {
-          options: {
-            strict: true,
-            strictSeparator: true
-          }
-        },
-        errorMessage: USERS_MESSAGES.DATE_OF_BIRTH_BE_ISO8601
-      }
+      date_of_birth: dateOfBirthSchema
     },
     ['body']
   )
 )
+
+// ??????? làm sao để implement
+type decoded_authorization_Type = {
+  user_id: string
+  token_type: TokenType
+  verify: UserVerifyStatus
+  iat: number
+  exp: number
+}
 
 export const accessTokenValidator = validate(
   // nếu là lỗi của 422 thì validate sẽ sử xứ, còn ko thì quăng ra default handler
@@ -196,7 +221,6 @@ export const accessTokenValidator = validate(
     {
       Authorization: {
         trim: true,
-
         custom: {
           options: async (value, { req }) => {
             const accessToken = value.split(' ')[1]
@@ -212,13 +236,13 @@ export const accessTokenValidator = validate(
               })
               // sau khi verify thành công ta đc payload của access_token: decoded_authorization
               ;(req as Request).decoded_authorization = decoded_authorization
+              console.log(decoded_authorization)
             } catch (error) {
               throw new ErrorWithStatus({
                 message: capitalize((error as JsonWebTokenError).message),
                 status: HTTP_STATUS.UNAUTHORIZED
               })
             }
-
             return true
           }
         }
@@ -409,6 +433,141 @@ export const resetPasswordValidator = validate(
     {
       password: passwordSchema,
       confirm_password: confirmPasswordSchema
+    },
+    ['body']
+  )
+)
+
+export const verifiedUserValidator = (req: Request, res: Response, next: NextFunction) => {
+  // kiểm tra xem user đã verify hay chưa
+  const { verify } = req.decoded_authorization as TokenPayload
+  if (verify === 0) {
+    throw new ErrorWithStatus({
+      message: USERS_MESSAGES.USER_NOT_VERIFIED,
+      status: HTTP_STATUS.FORBIDDEN //403
+    })
+  }
+  next()
+}
+
+export const updateMeValidator = validate(
+  checkSchema(
+    {
+      name: {
+        optional: true, //đc phép có hoặc k
+        ...nameSchema, //phân rã nameSchema ra
+        notEmpty: undefined //ghi đè lên notEmpty của nameSchema
+      },
+      date_of_birth: {
+        optional: true, //đc phép có hoặc k
+        ...dateOfBirthSchema, //phân rã nameSchema ra
+        notEmpty: undefined //ghi đè lên notEmpty của nameSchema
+      },
+      bio: {
+        optional: true,
+        isString: {
+          errorMessage: USERS_MESSAGES.BIO_MUST_BE_A_STRING ////messages.ts thêm BIO_MUST_BE_A_STRING: 'Bio must be a string'
+        },
+        trim: true, //trim phát đặt cuối, nếu k thì nó sẽ lỗi validator
+        isLength: {
+          options: {
+            min: 1,
+            max: 200
+          },
+          errorMessage: USERS_MESSAGES.BIO_LENGTH_MUST_BE_LESS_THAN_200 //messages.ts thêm BIO_LENGTH_MUST_BE_LESS_THAN_200: 'Bio length must be less than 200'
+        }
+      },
+      //giống bio
+      location: {
+        optional: true,
+        isString: {
+          errorMessage: USERS_MESSAGES.LOCATION_MUST_BE_A_STRING ////messages.ts thêm LOCATION_MUST_BE_A_STRING: 'Location must be a string'
+        },
+        trim: true,
+        isLength: {
+          options: {
+            min: 1,
+            max: 200
+          },
+          errorMessage: USERS_MESSAGES.LOCATION_LENGTH_MUST_BE_LESS_THAN_200 //messages.ts thêm LOCATION_LENGTH_MUST_BE_LESS_THAN_200: 'Location length must be less than 200'
+        }
+      },
+      //giống location
+      website: {
+        optional: true,
+        isString: {
+          errorMessage: USERS_MESSAGES.WEBSITE_MUST_BE_A_STRING ////messages.ts thêm WEBSITE_MUST_BE_A_STRING: 'Website must be a string'
+        },
+        trim: true,
+        isLength: {
+          options: {
+            min: 1,
+            max: 200
+          },
+
+          errorMessage: USERS_MESSAGES.WEBSITE_LENGTH_MUST_BE_LESS_THAN_200 //messages.ts thêm WEBSITE_LENGTH_MUST_BE_LESS_THAN_200: 'Website length must be less than 200'
+        }
+      },
+      username: {
+        optional: true,
+        isString: {
+          errorMessage: USERS_MESSAGES.USERNAME_MUST_BE_A_STRING ////messages.ts thêm USERNAME_MUST_BE_A_STRING: 'Username must be a string'
+        },
+        trim: true,
+        isLength: {
+          options: {
+            min: 1,
+            max: 50
+          },
+          errorMessage: USERS_MESSAGES.USERNAME_LENGTH_MUST_BE_LESS_THAN_50 //messages.ts thêm USERNAME_LENGTH_MUST_BE_LESS_THAN_50: 'Username length must be less than 50'
+        }
+      },
+      avatar: imageSchema,
+      cover_photo: imageSchema
+    },
+    ['body']
+  )
+)
+
+export const followValidator = validate(
+  checkSchema(
+    {
+      followed_user_id: {
+        notEmpty: {
+          errorMessage: USERS_MESSAGES.FOLLOWED_USER_ID_IS_REQUIRED
+        },
+        trim: true,
+        custom: {
+          options: async (value, { req }) => {
+            // check value có phải ObjectId hay không
+            if (!ObjectId.isValid(value)) {
+              throw new ErrorWithStatus({
+                message: USERS_MESSAGES.INVALID_FOLLOWED_USER_ID,
+                status: HTTP_STATUS.NOT_FOUND
+              })
+            }
+
+            // kiểm tra xem người dùng có tồn tại hay không
+            const followed_user = await databaseService.users.findOne({ _id: new ObjectId(value) })
+
+            if (followed_user === null) {
+              throw new ErrorWithStatus({
+                message: USERS_MESSAGES.USER_NOT_FOUND,
+                status: HTTP_STATUS.NOT_FOUND
+              })
+            }
+
+            // kiểm tra xem người dùng có tự follow chính mình hay không
+            if (followed_user._id.toString() === req.decoded_authorization.user_id) {
+              throw new ErrorWithStatus({
+                message: USERS_MESSAGES.CANNOT_FOLLOW_YOURSELF,
+                status: HTTP_STATUS.FORBIDDEN
+              })
+            }
+            return true
+          }
+        }
+      }
     },
     ['body']
   )
