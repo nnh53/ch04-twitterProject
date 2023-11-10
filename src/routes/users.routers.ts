@@ -8,6 +8,7 @@ import {
   getProfileController,
   loginController,
   logoutController,
+  oAuthController,
   refreshTokenController,
   resendEmailVerifyController,
   resetPasswordController,
@@ -243,5 +244,7 @@ body: {refresh_token: string}
 */
 
 usersRouter.post('/refresh-token', refreshTokenValidator, wrapAsync(refreshTokenController))
+
+usersRouter.get('/oauth/google', wrapAsync(oAuthController))
 
 export default usersRouter

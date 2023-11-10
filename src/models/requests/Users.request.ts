@@ -1,6 +1,4 @@
 import { ParamsDictionary } from 'express-serve-static-core'
-import { getProfileController } from './../../controllers/users.controllers'
-import { verify } from 'crypto'
 import { JwtPayload } from 'jsonwebtoken'
 import { UserVerifyStatus } from '~/constants/enums'
 

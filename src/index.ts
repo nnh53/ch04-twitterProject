@@ -3,8 +3,9 @@ import express from 'express'
 import userRouter from './routes/users.routers'
 import databaseService from './services/database.services'
 import { defaultErrorHandler } from './middlewares/error.middlewares'
+import mediasRouter from './routes/media.routers'
 
-const PORT = 3000
+const PORT = 4000
 
 const app = express()
 
@@ -26,6 +27,8 @@ app.get('/', (req, res) => {
 
 // express SỬ DỤNG userRouter nếu vô localhost:3000/users
 app.use('/users', userRouter)
+
+app.use('/medias', mediasRouter)
 
 // Error handler tổng
 app.use(defaultErrorHandler)

@@ -1,4 +1,5 @@
 export const USERS_MESSAGES = {
+  EMAIL_NOT_VERIFIED: 'Email not verified',
   CHANGE_PASSWORD_SUCCESS: 'Change password success',
   OLD_PASSWORD_IS_INCORRECT: 'Old password is incorrect',
   USERNAME_IS_INVALID: 'Username is invalid',

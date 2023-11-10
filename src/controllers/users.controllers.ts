@@ -1,4 +1,3 @@
-import { verify } from 'crypto'
 import { ParamsDictionary } from 'express-serve-static-core'
 import { NextFunction, Request, Response } from 'express'
 import userService from '~/services/users.services'
@@ -248,4 +247,11 @@ export const refreshTokenController = async (
 
   const result = await userService.refreshToken({ user_id, refresh_token, verify })
   return res.json(result)
+}
+
+export const oAuthController = async (req: Request, res: Response, next: NextFunction) => {
+  const { code } = req.query
+  const { access_token, refresh_token, new_user } = await userService.oAuth(code as string)
+  const urlRedirect = `${process.env.ClIENT_REDIRECT_CALLBACK}?access_token=${access_token}&refresh_token=${refresh_token}&new_user=${new_user}`
+  return res.redirect(urlRedirect)
 }
