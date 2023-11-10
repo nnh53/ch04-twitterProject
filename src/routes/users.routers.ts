@@ -8,6 +8,7 @@ import {
   getProfileController,
   loginController,
   logoutController,
+  refreshTokenController,
   resendEmailVerifyController,
   resetPasswordController,
   unfollowController,
@@ -223,7 +224,7 @@ des: change password
 path: '/change-password'
 method: put
 header: {Authorization: Bearer <access_token>}
-body: {old_password: string, new_password: string, confirm_new_password: string}
+body: {old_password: string, password: string, confirm_password: string}
 */
 usersRouter.put(
   '/change-password',
@@ -232,5 +233,15 @@ usersRouter.put(
   changePasswordValidator,
   wrapAsync(changePasswordController)
 )
+
+/*
+des: resend refresh token
+path: '/refresh-token'
+method: post
+header: {}
+body: {refresh_token: string}
+*/
+
+usersRouter.post('/refresh-token', refreshTokenValidator, wrapAsync(refreshTokenController))
 
 export default usersRouter

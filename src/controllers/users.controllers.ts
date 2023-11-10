@@ -1,11 +1,14 @@
+import { verify } from 'crypto'
 import { ParamsDictionary } from 'express-serve-static-core'
 import { NextFunction, Request, Response } from 'express'
 import userService from '~/services/users.services'
 import {
+  ChangePasswordReqBody,
   FollowReqBody,
   GetProfileReqParams,
   LoginReqBody,
   LogoutReqBody,
+  RefreshTokenReqBody,
   RegisterReqBody,
   ResetPasswordBody,
   TokenPayload,
@@ -225,9 +228,24 @@ export const unfollowController = async (
   return res.json(result)
 }
 
-export const changePasswordController = async (req: Request, res: Response, next: NextFunction) => {
+export const changePasswordController = async (
+  req: Request<ParamsDictionary, any, ChangePasswordReqBody>,
+  res: Response,
+  next: NextFunction
+) => {
   const { user_id } = req.decoded_authorization as TokenPayload
   const { password } = req.body
   const result = await userService.changePassword(user_id, password)
+  return res.json(result)
+}
+
+export const refreshTokenController = async (
+  req: Request<ParamsDictionary, any, RefreshTokenReqBody>,
+  res: Response
+) => {
+  const { refresh_token } = req.body
+  const { user_id, verify } = req.decoded_refresh_token as TokenPayload
+
+  const result = await userService.refreshToken({ user_id, refresh_token, verify })
   return res.json(result)
 }

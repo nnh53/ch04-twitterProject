@@ -32,6 +32,7 @@ export const verifyToken = ({
     jwt.verify(token, publicOrSecretKey, options, (err: any, decoded: any) => {
       // decoded là payload đã decode
       if (err) throw reject(err)
+      // truyền tiếp xuống controller
       resolve(decoded as TokenPayload)
     })
   })

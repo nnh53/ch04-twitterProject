@@ -6,6 +6,7 @@
   "configurations": [
     {
       "type": "node",
+      "preLaunchTask": "npm: build",
       "request": "launch",
       "name": "Launch Program",
       "skipFiles": ["<node_internals>/**"],

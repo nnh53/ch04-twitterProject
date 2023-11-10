@@ -290,48 +290,52 @@ export const accessTokenValidator = validate(
 )
 
 export const refreshTokenValidator = validate(
-  checkSchema({
-    refresh_token: {
-      trim: true,
+  checkSchema(
+    {
+      refresh_token: {
+        notEmpty: {
+          errorMessage: USERS_MESSAGES.REFRESH_TOKEN_IS_REQUIRED
+        },
+        trim: true,
+        custom: {
+          options: async (value, { req }) => {
+            // verify refresh_token gửi lên và lấy payload ra lưu lại trong req
+            try {
+              const [decoded_refresh_token, refresh_token] = await Promise.all([
+                verifyToken({
+                  token: value,
+                  publicOrSecretKey: process.env.JWT_SECRET_REFRESH_TOKEN as string
+                }),
+                databaseService.refreshTokens.findOne({
+                  token: value
+                })
+              ])
 
-      custom: {
-        options: async (value, { req }) => {
-          // nếu xuống đc đây thì tức là refresh_token có rồi
-          // cần verify refresh_token và lấy payload ra lưu lại trong req
-          try {
-            const [decoded_refresh_token, refresh_token] = await Promise.all([
-              verifyToken({
-                token: value,
-                publicOrSecretKey: process.env.JWT_SECRET_REFRESH_TOKEN as string
-              }),
-              databaseService.refreshTokens.findOne({
-                token: value
-              })
-            ])
-
-            if (refresh_token === null) {
-              throw new ErrorWithStatus({
-                message: USERS_MESSAGES.REFRESH_TOKEN_IS_NOT_EXIST,
-                status: HTTP_STATUS.UNAUTHORIZED
-              })
+              if (refresh_token === null) {
+                throw new ErrorWithStatus({
+                  message: USERS_MESSAGES.REFRESH_TOKEN_IS_NOT_EXIST,
+                  status: HTTP_STATUS.UNAUTHORIZED
+                })
+              }
+              ;(req as Request).decoded_refresh_token = decoded_refresh_token
+            } catch (error) {
+              // chỗ này chủ yếu để xử lý lỗi của jwt "do không có status"
+              if (error instanceof JsonWebTokenError) {
+                throw new ErrorWithStatus({
+                  message: capitalize((error as JsonWebTokenError).message),
+                  status: HTTP_STATUS.UNAUTHORIZED
+                })
+              }
+              // nếu ko phải lỗi của jwt thì vẫn quăng ra validate bth
+              throw error
             }
-            ;(req as Request).decoded_refresh_token = decoded_refresh_token
-          } catch (error) {
-            // chỗ này chủ yếu để xử lý lỗi của jwt "do không có status"
-            if (error instanceof JsonWebTokenError) {
-              throw new ErrorWithStatus({
-                message: capitalize((error as JsonWebTokenError).message),
-                status: HTTP_STATUS.UNAUTHORIZED
-              })
-            }
-            //nếu ko phải lỗi của jwt thì vẫn quăng ra validate bth
-            throw error
+            return true
           }
-          return true
         }
       }
-    }
-  })
+    },
+    ['body']
+  )
 )
 
 export const emailVerifyTokenValidator = validate(
