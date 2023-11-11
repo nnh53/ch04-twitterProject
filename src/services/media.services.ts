@@ -1,30 +1,57 @@
-import { UPLOAD_MAIN_DIR } from './../constants/dir'
+import { UPLOAD_IMAGE_DIR } from './../constants/dir'
 import { Request } from 'express'
 import { File, Files } from 'formidable'
 import sharp from 'sharp'
-import { getFileNameFromFile, handleUploadImage } from '~/utils/file'
+import { getFileNameFromFile, handleUploadImage, handleUploadVideo } from '~/utils/file'
 import fs from 'fs'
 import { isProduction } from '~/constants/config'
+import { MediaType } from '~/constants/enums'
+import Media from '~/models/schemas/Other'
 
 class MediaService {
   async uploadImage(req: Request) {
-    // lưu ảnh vào trong uploads và temp
-    const file = await handleUploadImage(req)
+    const files = await handleUploadImage(req) //handleUploadImage giờ trả ra mảng các file
 
-    // xử lý file bằng sharp giúp tối ưu hình ảnh
-    // có thuộc tính tên là newFilename
-    const newFileName = getFileNameFromFile(file.newFilename) + '.jpg'
-    const newPath = UPLOAD_MAIN_DIR + '/' + newFileName
-    const info = await sharp(file.filepath).jpeg().toFile(newPath)
+    const result: Media[] = await Promise.all(
+      files.map(async (file) => {
+        //files.map return về mảng các promise
+        //xử lý từng file một, mà có Promise.all sẽ xử lý song song=> nhanh hơn
+        //xử lý file bằng sharp
+        ////filepath là đường của file cần xử lý đang nằm trong uploads/temp
+        //file.newFilename: là tên unique mới của file sau khi upload lên, ta xóa đuôi và thêm jpg
+        const newFilename = getFileNameFromFile(file.newFilename) + '.jpg'
+        const newPath = UPLOAD_IMAGE_DIR + '/' + newFilename //đường dẫn mới của file sau khi xử lý
+        const info = await sharp(file.filepath).jpeg().toFile(newPath)
 
-    // xóa file trong temp
-    fs.unlinkSync(file.filepath)
+        fs.unlinkSync(file.filepath) //xóa file cũ đi
+        //cữ mỗi file sẽ biến thành object chứa thông tin của file
+        //để ý url, vì ta đã thêm /image/ để đúng với route đã viết ở Serving static file
+        return {
+          url: isProduction
+            ? `${process.env.HOST}/static/image/${newFilename}`
+            : `http://localhost:${process.env.PORT}/static/image/${newFilename}`,
+          type: MediaType.Image
+        }
+      })
+    )
+    return result
+  }
 
-    // prettier-ignore
-    return (
-      isProduction
-        ? `${process.env.HOST}/static/${newFileName}`
-        : `http://localhost:${process.env.PORT_DEVELOPMENT}/static/image/${newFileName}`)
+  async uploadVideo(req: Request) {
+    const files = await handleUploadVideo(req)
+
+    const result: Media[] = await Promise.all(
+      files.map(async (video) => {
+        const { newFilename } = video
+        return {
+          url: isProduction
+            ? `${process.env.HOST}/static/video/${newFilename}`
+            : `http://localhost:${process.env.PORT}/static/video/${newFilename}`,
+          type: MediaType.Video
+        }
+      })
+    )
+    return result
   }
 }
 

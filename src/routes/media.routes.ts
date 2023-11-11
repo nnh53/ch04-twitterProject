@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { uploadImageController } from '~/controllers/medias.controllers'
+import { uploadImageController, uploadVideoController } from '~/controllers/medias.controllers'
 import { accessTokenValidator, verifiedUserValidator } from '~/middlewares/users.middlewares'
 import { wrapAsync } from '~/utils/handlers'
 
@@ -11,5 +11,12 @@ mediasRouter.post(
   verifiedUserValidator,
   wrapAsync(uploadImageController)
 )
+
+mediasRouter.post(
+  '/upload-video',
+  accessTokenValidator,
+  verifiedUserValidator,
+  wrapAsync(uploadVideoController)
+) // uploadVideoController chưa làm
 
 export default mediasRouter
