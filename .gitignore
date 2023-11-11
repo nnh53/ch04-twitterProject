@@ -3,6 +3,7 @@
 client_secret*.json
 /03-csdl-mongo
 /04-TweetProject
+/uploads
 
 ### Node ###
 # Logs

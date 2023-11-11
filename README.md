@@ -2,11 +2,13 @@
 
 ---
 
-## Create under the mentor of [Lê Điệp](https://www.facebook.com/nomadic.lodestar)
+## Create under the teaching of [Lê Điệp](https://www.facebook.com/nomadic.lodestar)
 
 My Class [PIED tới đây](https://www.facebook.com/PiedTeam)
 
-I'm very grateful for having you as mentor in my life
+I'm very grateful for having you as teacher in my life
+
+Without you, I won't be someone like today
 
 ---
 
