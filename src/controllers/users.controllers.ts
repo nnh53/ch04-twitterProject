@@ -1,6 +1,6 @@
 import { ParamsDictionary } from 'express-serve-static-core'
 import { NextFunction, Request, Response } from 'express'
-import userService from '~/services/users.services'
+import usersService from '~/services/users.services'
 import {
   ChangePasswordReqBody,
   FollowReqBody,
@@ -31,7 +31,7 @@ export const loginController = async (req: Request<ParamsDictionary, any, LoginR
   const user_id = user._id as ObjectId
 
   // dùng user_id tạo ra access_token và refresh_token
-  const result = await userService.login({ user_id: user_id.toString(), verify: user.verify })
+  const result = await usersService.login({ user_id: user_id.toString(), verify: user.verify })
   // res access_token và refresh_token về cho client
   res.json({ message: USERS_MESSAGES.LOGIN_SUCCESS, result })
 }
@@ -42,7 +42,7 @@ export const registerController = async (
 ) => {
   // const { email, password, confirm_password,  } = req.body
   // nhét vô database
-  const result = await userService.register(req.body)
+  const result = await usersService.register(req.body)
   res.json({ message: USERS_MESSAGES.REGISTER_SUCCESS, result })
 }
 
@@ -50,7 +50,7 @@ export const logoutController = async (req: Request<ParamsDictionary, any, Logou
   // lấy refresh_token từ req.body
   const { refresh_token } = req.body
   //logout:  vào database xóa refresh_token này
-  const result = await userService.logout(refresh_token)
+  const result = await usersService.logout(refresh_token)
 
   res.json(result)
 }
@@ -79,7 +79,7 @@ export const emailVerifyController = async (
 
   // nếu mà xuống đc đây nghĩa là user chưa verify
   // mình sẽ update lại user đó
-  const result = await userService.verifyEmail(user_id)
+  const result = await usersService.verifyEmail(user_id)
   return res.json({
     message: USERS_MESSAGES.EMAIL_VERIFY_SUCCESS,
     result
@@ -121,7 +121,7 @@ export const resendEmailVerifyController = async (req: Request, res: Response) =
   }
 
   // cập nhật lại user
-  const result = await userService.resendEmailVerify(user_id)
+  const result = await usersService.resendEmailVerify(user_id)
 
   return res.json({
     result
@@ -133,7 +133,7 @@ export const forgotPasswordController = async (req: Request, res: Response) => {
   const { _id, verify } = req.user as User
 
   // dùng _id tìm và cập nhật lại user thêm vào forgot_password_token
-  const result = await userService.forgotPassword({
+  const result = await usersService.forgotPassword({
     user_id: (_id as ObjectId).toString(),
     verify: verify
   })
@@ -153,7 +153,7 @@ export const resetPasswordController = async (
   const { user_id } = req.decoded_forgot_password_token as TokenPayload
   const { password } = req.body
   // cập nhật password mới cho user có user_id này
-  const result = await userService.resetPassword({ user_id, password })
+  const result = await usersService.resetPassword({ user_id, password })
   return res.json(result)
 }
 
@@ -161,7 +161,7 @@ export const getMeController = async (req: Request, res: Response) => {
   // lấy thông tin user từ req.user
   const { user_id } = req.decoded_authorization as TokenPayload
   // tiến hành vào database lấy thông tin user
-  const user = await userService.getMe(user_id)
+  const user = await usersService.getMe(user_id)
   return res.json({
     message: USERS_MESSAGES.GET_ME_SUCCESS,
     result: user
@@ -179,7 +179,7 @@ export const updateMeController = async (
   const { body } = req
 
   // giờ mình sẽ update user thông qua user_id này với body đc cho
-  const result = await userService.updateMe(user_id, body)
+  const result = await usersService.updateMe(user_id, body)
 
   return res.json({
     message: USERS_MESSAGES.UPDATE_ME_SUCCESS,
@@ -195,7 +195,7 @@ export const getProfileController = async (
   // muốn lấy thông tin user thì cần username
 
   const { username } = req.params //lấy username từ query params
-  const result = await userService.getProfile(username)
+  const result = await usersService.getProfile(username)
   return res.json({
     message: USERS_MESSAGES.GET_PROFILE_SUCCESS, //message.ts thêm  GET_PROFILE_SUCCESS: 'Get profile success',
     result
@@ -209,7 +209,7 @@ export const followController = async (
 ) => {
   const { user_id } = req.decoded_authorization as TokenPayload //lấy user_id từ decoded_authorization của access_token trong req
   const { followed_user_id } = req.body //lấy followed_user_id từ req.body
-  const result = await userService.follow(user_id, followed_user_id)
+  const result = await usersService.follow(user_id, followed_user_id)
   return res.json(result)
 }
 
@@ -223,7 +223,7 @@ export const unfollowController = async (
   // lấy ra người mà mình muốn unfollow
   const { user_id: followed_user_id } = req.params
   // gọi hàm unfollow
-  const result = await userService.unfollow(user_id, followed_user_id)
+  const result = await usersService.unfollow(user_id, followed_user_id)
   return res.json(result)
 }
 
@@ -234,7 +234,7 @@ export const changePasswordController = async (
 ) => {
   const { user_id } = req.decoded_authorization as TokenPayload
   const { password } = req.body
-  const result = await userService.changePassword(user_id, password)
+  const result = await usersService.changePassword(user_id, password)
   return res.json(result)
 }
 
@@ -243,15 +243,15 @@ export const refreshTokenController = async (
   res: Response
 ) => {
   const { refresh_token } = req.body
-  const { user_id, verify } = req.decoded_refresh_token as TokenPayload
+  const { user_id, verify, exp } = req.decoded_refresh_token as TokenPayload
 
-  const result = await userService.refreshToken({ user_id, refresh_token, verify })
+  const result = await usersService.refreshToken({ user_id, refresh_token, verify, exp })
   return res.json(result)
 }
 
 export const oAuthController = async (req: Request, res: Response, next: NextFunction) => {
   const { code } = req.query
-  const { access_token, refresh_token, new_user } = await userService.oAuth(code as string)
+  const { access_token, refresh_token, new_user } = await usersService.oAuth(code as string)
   const urlRedirect = `${process.env.ClIENT_REDIRECT_CALLBACK}?access_token=${access_token}&refresh_token=${refresh_token}&new_user=${new_user}`
   return res.redirect(urlRedirect)
 }

@@ -27,6 +27,8 @@ export interface TokenPayload extends JwtPayload {
   user_id: string
   refresh_token: string
   verify: UserVerifyStatus
+  exp: number
+  iat: number
 }
 
 export interface ResetPasswordBody {

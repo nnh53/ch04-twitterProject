@@ -5,8 +5,10 @@ import { defaultErrorHandler } from './middlewares/error.middlewares'
 import mediasRouter from './routes/media.routes'
 import { initFolder } from './utils/file'
 import { config } from 'dotenv'
-import { UPLOAD_IMAGE_DIR } from './constants/dir'
 import staticRouter from './routes/static.routes'
+import { UPLOAD_VIDEO_DIR, UPLOAD_VIDEO_TEMP_DIR } from './constants/dir'
+import { MongoClient } from 'mongodb'
+import tweetsRouter from './routes/tweet.routes'
 config()
 
 const PORT = process.env.PORT_DEVELOPMENT
@@ -18,25 +20,32 @@ initFolder()
 app.use(express.json())
 
 // MongoDB
-databaseService.connect()
+databaseService.connect().then(() => {
+  databaseService.indexUsers()
+  databaseService.indexRefreshTokens()
+  databaseService.indexFollowers()
+})
 
 // middleware log lại tất cả các request
-app.all('*', (req, res, next) => {
-  console.log('Time', Date.now())
-  // console.log(req)
-  next()
-})
+// app.all('*', (req, res, next) => {
+//   console.log('Time', Date.now())
+//   console.log(req)
+//   next()
+// })
 
 app.get('/', (req, res) => {
   res.send('hello world')
 })
 
 // express SỬ DỤNG userRouter nếu vô localhost:3000/users
+// app.use('/static', express.static(UPLOAD_VIDEO_TEMP_DIR))
 app.use('/static', staticRouter)
 
 app.use('/users', userRouter)
 
 app.use('/medias', mediasRouter)
+
+app.use('/tweets', tweetsRouter)
 
 // Error handler tổng
 app.use(defaultErrorHandler)

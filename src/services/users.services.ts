@@ -4,7 +4,7 @@ import databaseService from '~/services/database.services'
 import User from '~/models/schemas/User.schema'
 import { RegisterReqBody, UpdateMeReqBody } from '~/models/requests/Users.request'
 import { hashPassword } from '~/utils/crypto'
-import { signToken } from '~/utils/jwt'
+import { signToken, verifyToken } from '~/utils/jwt'
 import { TokenType, UserVerifyStatus } from '~/constants/enums'
 import { config } from 'dotenv'
 import RefreshToken from '~/models/schemas/RefreshToken.schema'
@@ -15,6 +15,13 @@ import HTTP_STATUS from '~/constants/httpStatus'
 config()
 
 class UsersService {
+  private decodeRefreshToken(refresh_token: string) {
+    return verifyToken({
+      token: refresh_token,
+      publicOrSecretKey: process.env.JWT_SECRET_REFRESH_TOKEN as string
+    })
+  }
+
   // hàm nhận vào user_id để bỏ vào payload tạo access token
   signAccessToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
     return signToken({
@@ -31,18 +38,31 @@ class UsersService {
   }
 
   // hàm nhận vào user_id để bỏ vào payload tạo refresh token
-  signRefreshToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
-    return signToken({
-      privateKey: process.env.JWT_SECRET_REFRESH_TOKEN as string,
-      payload: {
-        user_id,
-        token_type: TokenType.RefreshToken,
-        verify
-      },
-      options: {
-        expiresIn: process.env.REFRESH_TOKEN_EXPIRE_IN
-      }
-    })
+  signRefreshToken({ user_id, verify, exp }: { user_id: string; verify: UserVerifyStatus; exp?: number }) {
+    // nếu exp tồn tại thì không set expiresIn
+    if (exp) {
+      return signToken({
+        privateKey: process.env.JWT_SECRET_REFRESH_TOKEN as string,
+        payload: {
+          user_id,
+          token_type: TokenType.RefreshToken,
+          verify,
+          exp
+        }
+      })
+    } else {
+      return signToken({
+        privateKey: process.env.JWT_SECRET_REFRESH_TOKEN as string,
+        payload: {
+          user_id,
+          token_type: TokenType.RefreshToken,
+          verify
+        },
+        options: {
+          expiresIn: process.env.REFRESH_TOKEN_EXPIRE_IN
+        }
+      })
+    }
   }
 
   // hàm signEmailVerifyToken
@@ -95,9 +115,11 @@ class UsersService {
       verify: UserVerifyStatus.Unverified
     })
 
+    const { exp, iat } = await this.decodeRefreshToken(refresh_token)
+
     // lưu refresh_token vào database
     await databaseService.refreshTokens.insertOne(
-      new RefreshToken({ token: refresh_token, user_id: new ObjectId(user_id) })
+      new RefreshToken({ token: refresh_token, user_id: new ObjectId(user_id), exp, iat })
     )
 
     // aws ses
@@ -117,8 +139,10 @@ class UsersService {
 
     // lưu refresh_token vào database
     // một ng dùng có thể có nhiều refresh do có nhiều thiết bị
+    const { exp, iat } = await this.decodeRefreshToken(refresh_token)
+
     await databaseService.refreshTokens.insertOne(
-      new RefreshToken({ token: refresh_token, user_id: new ObjectId(user_id) })
+      new RefreshToken({ token: refresh_token, user_id: new ObjectId(user_id), exp, iat })
     )
 
     return { access_token: access_token, refresh_token: refresh_token }
@@ -134,7 +158,6 @@ class UsersService {
     await databaseService.users.updateOne({ _id: new ObjectId(user_id) }, [
       {
         $set: {
-          verify: UserVerifyStatus.Verified,
           email_verify_token: '',
           updated_at: '$$NOW'
         }
@@ -148,8 +171,10 @@ class UsersService {
     })
 
     // lưu refresh_token vào database
+    const { exp, iat } = await this.decodeRefreshToken(refresh_token)
+
     await databaseService.refreshTokens.insertOne(
-      new RefreshToken({ token: refresh_token, user_id: new ObjectId(user_id) })
+      new RefreshToken({ token: refresh_token, user_id: new ObjectId(user_id), exp, iat })
     )
     return { access_token: access_token, refresh_token: refresh_token }
   }
@@ -186,10 +211,10 @@ class UsersService {
         user_id,
         token_type: TokenType.ForgotPasswordToken
       },
+      privateKey: process.env.JWT_SECRET_FORGOT_PASSWORD_TOKEN as string,
       options: {
         expiresIn: process.env.FORGOT_PASSWORD_TOKEN_EXPIRE_IN
-      },
-      privateKey: process.env.JWT_SECRET_FORGOT_PASSWORD_TOKEN as string
+      }
     })
   }
 
@@ -355,24 +380,28 @@ class UsersService {
   async refreshToken({
     user_id,
     refresh_token,
-    verify
+    verify,
+    exp
   }: {
     user_id: string
     refresh_token: string
     verify: UserVerifyStatus
+    exp: number
   }) {
     // xóa refresh_token cũ
     await databaseService.refreshTokens.deleteOne({ token: refresh_token })
 
     // tạo ra access_token và refresh_token mới
-    const [access_token, new_refresh_token] = await this.signAccessAndRefreshToken({
-      user_id,
-      verify
-    })
+    const [access_token, new_refresh_token] = await Promise.all([
+      this.signAccessToken({ user_id, verify }),
+      this.signRefreshToken({ user_id, verify, exp })
+    ])
 
     // nhét refresh_token mới vào database
+    const { iat } = await this.decodeRefreshToken(refresh_token)
+
     await databaseService.refreshTokens.insertOne(
-      new RefreshToken({ token: new_refresh_token, user_id: new ObjectId(user_id) })
+      new RefreshToken({ token: new_refresh_token, user_id: new ObjectId(user_id), exp, iat })
     )
 
     return { access_token: access_token, refresh_token: new_refresh_token }
@@ -445,8 +474,10 @@ class UsersService {
         verify: user.verify
       })
       // lưu lại refresh_token vào database
+      const { exp, iat } = await this.decodeRefreshToken(refresh_token)
+
       await databaseService.refreshTokens.insertOne(
-        new RefreshToken({ token: refresh_token, user_id: new ObjectId(user._id) })
+        new RefreshToken({ token: refresh_token, user_id: new ObjectId(user._id), exp, iat })
       )
       return {
         access_token: access_token,
@@ -479,5 +510,5 @@ class UsersService {
   // console.log(result)
   // return result
 }
-const userService = new UsersService()
-export default userService
+const usersService = new UsersService()
+export default usersService
