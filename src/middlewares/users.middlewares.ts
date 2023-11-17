@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express'
 import { USERS_MESSAGES } from '~/constants/message'
 import { ParamSchema, checkSchema } from 'express-validator'
 import { ErrorWithStatus } from '~/models/Errors'
-import userService from '~/services/users.services'
+import usersService from '~/services/users.services'
 import { validate } from '~/utils/validation'
 import databaseService from '~/services/database.services'
 import { hashPassword } from '~/utils/crypto'
@@ -224,7 +224,7 @@ export const registerValidator = validate(
         trim: true,
         custom: {
           options: async (value, { req }) => {
-            const isExist = await userService.checkEmailExist(value)
+            const isExist = await usersService.checkEmailExist(value)
             if (isExist) {
               throw new Error(USERS_MESSAGES.EMAIL_ALREADY_EXISTS)
             }
@@ -273,7 +273,7 @@ export const accessTokenValidator = validate(
               })
               // sau khi verify thành công ta đc payload của access_token: decoded_authorization
               ;(req as Request).decoded_authorization = decoded_authorization
-              console.log(decoded_authorization)
+              // console.log(decoded_authorization)
             } catch (error) {
               throw new ErrorWithStatus({
                 message: capitalize((error as JsonWebTokenError).message),
@@ -417,9 +417,9 @@ export const verifyForgotPasswordTokenValidator = validate(
       forgot_password_token: {
         trim: true,
         custom: {
-          options: async (value, { req }) => {
+          options: async (forgotPasswordTokenFromRequest, { req }) => {
             // kiểm tra ng dùng có truyền lên forgot_password_token hay ko
-            if (!value) {
+            if (!forgotPasswordTokenFromRequest) {
               throw new ErrorWithStatus({
                 message: USERS_MESSAGES.FORGOT_PASSWORD_TOKEN_IS_REQUIRED,
                 status: HTTP_STATUS.UNAUTHORIZED
@@ -428,8 +428,8 @@ export const verifyForgotPasswordTokenValidator = validate(
             // verify forgot_password_token để lấy decoded_forgot_password_token
             try {
               const decoded_forgot_password_token = await verifyToken({
-                token: value,
-                publicOrSecretKey: process.env.JWT_SECRET_EMAIL_VERIFY_TOKEN as string
+                token: forgotPasswordTokenFromRequest,
+                publicOrSecretKey: process.env.JWT_SECRET_FORGOT_PASSWORD_TOKEN as string
               })
 
               // sau khi verify ta đc payload của forgot_password_token: decoded_forgot_password_token
@@ -446,7 +446,7 @@ export const verifyForgotPasswordTokenValidator = validate(
                 })
               }
 
-              if (user.forgot_password_token !== value) {
+              if (user.forgot_password_token !== forgotPasswordTokenFromRequest) {
                 throw new ErrorWithStatus({
                   message: USERS_MESSAGES.FORGOT_PASSWORD_TOKEN_IS_INCORRECT,
                   status: HTTP_STATUS.UNAUTHORIZED
