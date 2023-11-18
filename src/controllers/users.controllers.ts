@@ -141,7 +141,7 @@ export const forgotPasswordController = async (req: Request, res: Response) => {
   return res.json(result)
 }
 
-export const verifyForgotPasswordController = async (req: Request, res: Response) => {
+export const verifyForgotPasswordTokenController = async (req: Request, res: Response) => {
   return res.json({ message: USERS_MESSAGES.VERIFY_FORGOT_PASSWORD_TOKEN_SUCCESS })
 }
 

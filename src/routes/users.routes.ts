@@ -14,7 +14,7 @@ import {
   resetPasswordController,
   unfollowController,
   updateMeController,
-  verifyForgotPasswordController
+  verifyForgotPasswordTokenController
 } from '~/controllers/users.controllers'
 import {
   accessTokenValidator,
@@ -124,7 +124,7 @@ họ sẽ gửi req kèm theo forgot_password_token lên
 usersRouter.post(
   '/verify-forgot-password',
   verifyForgotPasswordTokenValidator,
-  wrapAsync(verifyForgotPasswordController)
+  wrapAsync(verifyForgotPasswordTokenController)
 )
 
 /*
