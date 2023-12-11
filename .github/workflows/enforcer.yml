@@ -1,0 +1,16 @@
+name: Enforce branch workflow
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  job_enforce_main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce main
+        if: github.base_ref == 'main' && !(startsWith(github.head_ref, 'develop') || startsWith(github.head_ref, 'hotfix/'))
+        run: |
+          echo "ERROR: You can only merge to main from develop or hotfix/**"
+          exit 1

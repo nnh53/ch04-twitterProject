@@ -6,14 +6,6 @@ client_secret*.json
 /uploads
 *.fig
 
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
 ### Node ###
 # Logs
 logs
@@ -107,7 +99,6 @@ out
 # Nuxt.js build / generate output
 .nuxt
 dist
-dist-ssr
 
 # Gatsby files
 .cache/
