@@ -13,8 +13,7 @@ import {
   resendEmailVerifyController,
   resetPasswordController,
   unfollowController,
-  updateMeController,
-  verifyForgotPasswordTokenController
+  updateMeController
 } from '~/controllers/users.controllers'
 import {
   accessTokenValidator,
@@ -34,7 +33,7 @@ import {
 import { registerController } from '~/controllers/users.controllers'
 import { wrapAsync } from '~/utils/handlers'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
-import { UpdateMeReqBody } from '~/models/requests/Users.request'
+import { IUpdateMeReqBody } from '~/models/requests/Users.request'
 
 const usersRouter = Router()
 
@@ -50,7 +49,7 @@ body: {
   data_of_birth
 }
 */
-usersRouter.post('/register', registerValidator, wrapAsync(registerController)) //đúng ra là phải thêm có validator
+usersRouter.post('/register', registerValidator, wrapAsync(registerController))
 
 /*
 des: đăng nhập 
@@ -77,7 +76,7 @@ usersRouter.post('/logout', accessTokenValidator, refreshTokenValidator, wrapAsy
 /*
 des: email verify token  
 khi ng dùng đăng ký họ sẽ nhận đc mail có link dạng 
-https://localhost:3000/users/verify-email?token=<email_verify_token>
+https://localhost:4000/users/verify-email?token=<email_verify_token>
 
 nếu mà em nhấp vào link thì tạo ra req gửi email_verify_token lên server 
 
@@ -121,11 +120,11 @@ des: khi ng dùng nhấp vào link trong mail để reset password
 họ sẽ gửi req kèm theo forgot_password_token lên 
  */
 
-usersRouter.post(
-  '/verify-forgot-password',
-  verifyForgotPasswordTokenValidator,
-  wrapAsync(verifyForgotPasswordTokenController)
-)
+// usersRouter.post(
+//   '/verify-forgot-password',
+//   verifyForgotPasswordTokenValidator,
+//   wrapAsync(verifyForgotPasswordController)
+// )
 
 /*
 des: reset password
@@ -161,16 +160,6 @@ usersRouter.patch(
   '/me',
   accessTokenValidator,
   verifiedUserValidator,
-  filterMiddleware<UpdateMeReqBody>([
-    'name',
-    'date_of_birth',
-    'bio',
-    'location',
-    'website',
-    'avatar',
-    'username',
-    'cover_photo'
-  ]),
   updateMeValidator,
   wrapAsync(updateMeController)
 )
