@@ -6,15 +6,25 @@ import mediasRouter from './routes/media.routes'
 import { initFolder } from './utils/file'
 import { config } from 'dotenv'
 import staticRouter from './routes/static.routes'
-import { UPLOAD_VIDEO_DIR, UPLOAD_VIDEO_TEMP_DIR } from './constants/dir'
-import { MongoClient } from 'mongodb'
 import tweetsRouter from './routes/tweet.routes'
+import cors from 'cors'
 config()
 
-const PORT = process.env.PORT_DEVELOPMENT
+const PORT_BACKEND = process.env.PORT_DEVELOPMENT_BACKEND
+
+const PORT_FRONTEND = process.env.PORT_DEVELOPMENT_FRONTEND
 
 const app = express()
 initFolder()
+
+const corsOptions = {
+  origin: `http://localhost:${PORT_FRONTEND}`,
+  credentials: true,
+  allowedHeaders: 'Content-Type,Authorization',
+  optionsSuccessStatus: 200
+}
+
+app.use(cors(corsOptions))
 
 // Middleware to parse incoming requests come with JSON payloads
 app.use(express.json())
@@ -50,6 +60,6 @@ app.use('/tweets', tweetsRouter)
 // Error handler tổng
 app.use(defaultErrorHandler)
 
-app.listen(PORT, () => {
-  console.log(`Project twitter này đang chạy trên port ${PORT}`)
+app.listen(PORT_BACKEND, () => {
+  console.log(`Project twitter này đang chạy trên port ${PORT_BACKEND}`)
 })

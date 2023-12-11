@@ -4,9 +4,19 @@
 			"path": "src/middlewares/users.middlewares.ts",
 			"bookmarks": [
 				{
-					"line": 243,
+					"line": 236,
 					"column": 5,
 					"label": "decoded_authorization_Type"
+				}
+			]
+		},
+		{
+			"path": "src/routes/users.routes.ts",
+			"bookmarks": [
+				{
+					"line": 94,
+					"column": 0,
+					"label": "phải fix thành trên param"
 				}
 			]
 		}
