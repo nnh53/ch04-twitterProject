@@ -3,6 +3,7 @@ name: Merge "hotfix/**" into "main" and "develop"
 on:
   pull_request:
     branches:
+      - main
       - hotfix/**
     types:
       - closed
