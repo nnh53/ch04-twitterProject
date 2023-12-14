@@ -12,6 +12,11 @@ jobs:
   merge_hotfix_into_main_and_develop:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 0
+
       - name: Merge hotfix into main and develop
         run: |
           git checkout main
