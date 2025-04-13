@@ -1,17 +1,17 @@
 import axios from 'axios'
-import { Follower } from './../models/schemas/Follower.schema'
-import databaseService from '~/services/database.services'
-import User from '~/models/schemas/User.schema'
-import { IRegisterReqBody, IUpdateMeReqBody } from '~/models/requests/Users.request'
-import { hashPassword } from '~/utils/crypto'
-import { signToken, verifyToken } from '~/utils/jwt'
-import { TokenType, UserVerifyStatus } from '~/constants/enums'
 import { config } from 'dotenv'
-import RefreshToken from '~/models/schemas/RefreshToken.schema'
 import { ObjectId } from 'mongodb'
+import { TokenType, UserVerifyStatus } from '~/constants/enums'
+import HTTP_STATUS from '~/constants/httpStatus'
 import { USERS_MESSAGES } from '~/constants/message'
 import { ErrorWithStatus } from '~/models/Errors'
-import HTTP_STATUS from '~/constants/httpStatus'
+import { IRegisterReqBody, IUpdateMeReqBody } from '~/models/requests/Users.request'
+import RefreshToken from '~/models/schemas/RefreshToken.schema'
+import User from '~/models/schemas/User.schema'
+import databaseService from '~/services/database.services'
+import { hashPassword } from '~/utils/crypto'
+import { signToken, verifyToken } from '~/utils/jwt'
+import { Follower } from './../models/schemas/Follower.schema'
 config()
 
 class UsersService {
@@ -68,7 +68,7 @@ class UsersService {
   // hàm signEmailVerifyToken
   private signEmailVerifyToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
     return signToken({
-      privateKey: process.env.JWT_SECRET_REFRESH_TOKEN as string,
+      privateKey: process.env.JWT_SECRET_EMAIL_VERIFY_TOKEN as string,
       payload: {
         user_id,
         token_type: TokenType.EmailVerificationToken,
@@ -159,7 +159,8 @@ class UsersService {
       {
         $set: {
           email_verify_token: '',
-          updated_at: '$$NOW'
+          updated_at: '$$NOW',
+          verify: UserVerifyStatus.Verified
         }
       }
     ])

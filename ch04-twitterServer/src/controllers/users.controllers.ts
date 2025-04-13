@@ -1,9 +1,13 @@
-import { ParamsDictionary } from 'express-serve-static-core'
 import { NextFunction, Request, Response } from 'express'
-import usersService from '~/services/users.services'
+import { ParamsDictionary } from 'express-serve-static-core'
+import { ObjectId } from 'mongodb'
+import { UserVerifyStatus } from '~/constants/enums'
+import HTTP_STATUS from '~/constants/httpStatus'
+import { USERS_MESSAGES } from '~/constants/message'
+import { ErrorWithStatus } from '~/models/Errors'
 import {
-  IChangePasswordReqBody,
   FollowReqBody,
+  IChangePasswordReqBody,
   IGetProfileReqParams,
   ILoginReqBody,
   ILogoutReqBody,
@@ -15,13 +19,9 @@ import {
   IUpdateMeReqBody,
   IVerifyEmailReqBody
 } from '~/models/requests/Users.request'
-import { ErrorWithStatus } from '~/models/Errors'
 import User from '~/models/schemas/User.schema'
-import { ObjectId } from 'mongodb'
-import { USERS_MESSAGES } from '~/constants/message'
 import databaseService from '~/services/database.services'
-import HTTP_STATUS from '~/constants/httpStatus'
-import { UserVerifyStatus } from '~/constants/enums'
+import usersService from '~/services/users.services'
 
 export const loginController = async (req: Request<ParamsDictionary, any, ILoginReqBody>, res: Response) => {
   // lấy user từ req gửi từ validator
@@ -101,13 +101,6 @@ export const resendEmailVerifyController = async (req: Request, res: Response) =
     throw new ErrorWithStatus({
       message: USERS_MESSAGES.USER_NOT_FOUND,
       status: HTTP_STATUS.NOT_FOUND
-    })
-  }
-  // nếu mà ko khớp email_verify_token thì quăng lỗi
-  if (user.email_verify_token !== req.body.email_verify_token) {
-    throw new ErrorWithStatus({
-      message: USERS_MESSAGES.EMAIL_VERIFY_TOKEN_IS_INCORRECT,
-      status: HTTP_STATUS.UNAUTHORIZED
     })
   }
 
